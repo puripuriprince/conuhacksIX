@@ -1,7 +1,22 @@
+* {
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+*::-webkit-scrollbar{
+    display: none;
+}
 body{
     overflow: hidden;
     width: 100dvw;
     height: 100dvh;
+    font-family: "Poppins", serif;
+    font-weight: 200;
+    font-style: normal;
+    margin: 0;
+}
+.grid{
+    display: grid;
 }
 .flex{
     display: flex;
@@ -97,6 +112,33 @@ body{
     height: 30px;
 }
 .desc-box{
-
     background-color: white;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    height: 75dvh;
+    width: 50dvw;
+    border-radius: 10px;
+    position: absolute;
+    top: 20dvh;
+    left: 30dvw;
+    overflow: auto;
+    word-break: break-word;
+}
+.desc-elements{
+overflow-y: auto;
+ gap: 10px;
+ margin: 10px;
+ grid-template-columns: auto auto;
+}
+.end{
+    justify-content: end;
+    margin: 10px;
+}
+.description{
+    font-weight: bold;
+}
+.see{
+    display: block;
+}
+.unsee{
+    display: none;
 }
