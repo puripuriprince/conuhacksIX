@@ -41,6 +41,10 @@ body{
     display: grid;
     grid-template-columns: 50px 45px auto 50px 50px;
     align-items: center;
+    transition: all 1s;
+}
+.item:hover{
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
 .urgent{
     height: 30px;
@@ -50,9 +54,15 @@ body{
 }
 .green{
     color: green;
+    transition: all 1s;
 }
 .red{
     color: red;
+    transition: all 1s;
+}
+.orange{
+    color: orange;
+    transition: all 1s;
 }
 .icon{
     font-size: 25px;
@@ -77,6 +87,16 @@ body{
     width: 30px;
     height: 30px;
 }
+.orange:hover{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 166, 0, 0.458);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+}
 .desc-box{
-    
+
+    background-color: white;
 }
