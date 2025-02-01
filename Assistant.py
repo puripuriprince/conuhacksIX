@@ -129,14 +129,7 @@ class ElevenLabsTTS:
                 voice_id=self.voice_id,
                 model_id="eleven_multilingual_v2"
             )
-            
-            # Convert generator to bytes
-            audio_data = b''
-            for chunk in audio_stream:
-                if isinstance(chunk, bytes):
-                    audio_data += chunk
-            
-            return audio_data
+            return audio_stream
             
         except Exception as e:
             raise ValueError(f"ElevenLabs API error: {str(e)}")

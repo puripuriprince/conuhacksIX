@@ -42,7 +42,7 @@ Emergency dispatch voice assistant that:
 ### Audio Settings
 - ElevenLabs voice ID: JBFqnCBsd6RMkjVDRZzb
 - MP3 format: 44.1kHz, 64kbps
-- Generate and save audio files temporarily
+- Stream audio chunks directly to client
 - Clean up audio files after 10 minutes
 - Always use ElevenLabs TTS, no fallback
 - Use ElevenLabs Python client with convert_as_stream for audio synthesis
@@ -50,7 +50,7 @@ Emergency dispatch voice assistant that:
 ### Important Implementation Details
 - Only start_audio.mp3 required in /static directory
 - Conversation history kept in memory (per call)
-- Direct streaming TTS for all responses
+- Stream audio chunks directly for faster playback
 - No temporary audio file storage needed
 
 ## Environment Variables Required

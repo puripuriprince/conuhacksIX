@@ -225,16 +225,22 @@ def process_voice():
         
         # Get TTS audio
         try:
-            print("\nAttempting to get TTS audio...")
-            audio_path = get_tts_audio(ai_reply)
+            print("\nStarting TTS stream synthesis...")
+            tts_engine = ElevenLabsTTS()
+            audio_stream = tts_engine.synthesize(ai_reply)
             
-            if audio_path:
-                print(f"Got audio file: {audio_path}")
-                print("Adding play command to TwiML response")
-                response.play(audio_path)
-            else:
-                print("Error: Failed to generate ElevenLabs audio")
-                raise Exception("ElevenLabs audio synthesis failed")
+            # Save audio stream to temporary file
+            temp_file = os.path.join(STATIC_DIR, f"response_{int(time.time())}.mp3")
+            with open(temp_file, 'wb') as f:
+                for chunk in audio_stream:
+                    if isinstance(chunk, bytes):
+                        f.write(chunk)
+            
+            # Schedule cleanup
+            cleanup_file_later(temp_file)
+            
+            # Play the temporary file
+            response.play(url_for('static', filename=os.path.basename(temp_file)))
                 
         except Exception as e:
             print(f"Error getting TTS stream: {str(e)}")
