@@ -249,9 +249,8 @@ def process_voice():
         
         response.pause(length=1)
         
-        # Ask the caller if they have another question using a new Gather
+        # Continue listening without a prompt
         gather = Gather(input="speech", action="/process_voice", method="POST", timeout=5)
-        response.say("Do you need any other assistance?")
         response.append(gather)
         
     except Exception as e:
