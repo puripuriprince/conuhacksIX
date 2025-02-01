@@ -111,47 +111,35 @@ Your responses should be concise, clear, and focused on gathering essential info
 # ------------------------------
 # ElevenLabs Text-to-Speech API
 # ------------------------------
-from elevenlabs import ElevenLabs
+from elevenlabs import stream
+from elevenlabs.client import ElevenLabs
 
 class ElevenLabsTTS:
     def __init__(self):
         self.api_key = os.getenv('ELEVEN_API_KEY')
         if not self.api_key:
             raise ValueError("ELEVEN_API_KEY not found in environment variables")
-        self.voice_id = "pFZP5JQG7iQjQjIQuC4Bku"  # Fixed voice ID for consistency
+        self.voice_id = "21m00Tcm4TlvDq8ikWAM"  # Fixed voice ID for consistency
         self.client = ElevenLabs(api_key=self.api_key)
 
     def synthesize(self, text):
-        print(f"\nElevenLabs TTS Request:")
-        print(f"Voice ID: {self.voice_id}")
-        print(f"Text: {text[:100]}...")  # Print first 100 chars
-        print(f"Model: eleven_multilingual_v2")
-        print(f"API Key present: {bool(self.api_key)}")
-        
         try:
-            # Use ElevenLabs client library properly
-            print("Using ElevenLabs client to generate audio stream...")
             audio_stream = self.client.text_to_speech.convert_as_stream(
-                voice_id=self.voice_id,
                 text=text,
-                model_id="eleven_multilingual_v2",
-                output_format="mp3_22050_32"
+                voice_id=self.voice_id,
+                model_id="eleven_multilingual_v2"
             )
             
-            if not audio_stream:
-                raise ValueError("Failed to generate audio stream")
-                
             # Convert generator to bytes
             audio_data = b''
             for chunk in audio_stream:
-                audio_data += chunk
-                
+                if isinstance(chunk, bytes):
+                    audio_data += chunk
+            
             return audio_data
             
         except Exception as e:
-            error_msg = f"ElevenLabs API error: {str(e)}"
-            print(error_msg)
-            raise ValueError(error_msg)
+            raise ValueError(f"ElevenLabs API error: {str(e)}")
 
 # ------------------------------
 # Phone Calling via Twilio API

@@ -40,11 +40,12 @@ Emergency dispatch voice assistant that:
 - Twilio for phone handling
 
 ### Audio Settings
-- ElevenLabs voice ID: pFZP5JQG7iQjIQuC4Bku
-- MP3 format: 22.05kHz, 32kbps
+- ElevenLabs voice ID: JBFqnCBsd6RMkjVDRZzb
+- MP3 format: 44.1kHz, 64kbps
 - Generate and save audio files temporarily
 - Clean up audio files after 10 minutes
 - Always use ElevenLabs TTS, no fallback
+- Use ElevenLabs Python client with convert_as_stream for audio synthesis
 
 ### Important Implementation Details
 - Only start_audio.mp3 required in /static directory
