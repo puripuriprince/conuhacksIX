@@ -29,27 +29,71 @@ class OpenRouterAPI:
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
-            "HTTP-Referer": "https://github.com/your-repo",  # Update with your actual site
-            "X-Title": "AI Voice Assistant"
+            "HTTP-Referer": "dispatcher",
+            "X-Title": "ConUHacks Voice Assistant"
         }
         
+        # System prompt for 911 dispatcher behavior
+        system_prompt = {
+            "role": "system",
+            "content": """You are a professional 911 emergency dispatcher. Your primary responsibility is to quickly and efficiently gather critical information to send appropriate emergency services. ONLY ANSWER WITH RESPONSES, DIRECT TEXT RESPONSES ONLY, NEVER QUOTE THE ASSISTANT YOU ARE THE ASSISTANT SO DIRACTLY RESPOND.
+
+Key protocols:
+1. Always maintain a calm, clear, and authoritative tone
+2. Immediately ask for the exact location of the emergency
+3. Determine the nature of the emergency
+4. Gather specific details about the situation
+5. Keep the caller on the line until help arrives
+6. Provide clear, life-saving instructions when needed
+
+Priority information to gather:
+- Exact address or location with landmarks
+- Nature of emergency (medical, fire, police)
+- Number of people involved
+- Any immediate dangers
+- Caller's name and callback number
+
+Remember:
+- Stay professional and focused
+- Ask clear, direct questions
+- Repeat important information back to verify
+- Provide reassurance while remaining practical
+- Keep the caller calm and focused
+- Never disconnect first
+
+Your responses should be concise, clear, and focused on gathering essential information to provide immediate assistance."""
+        }
+        
+        # Format messages for chat completion
+        messages = []
+        if isinstance(prompt, str):
+            # Single prompt string
+            messages = [system_prompt, {"role": "user", "content": prompt}]
+        else:
+            # Assuming prompt is already in message format
+            # Insert system prompt at the beginning if it's not already there
+            if not any(msg.get("role") == "system" for msg in prompt):
+                messages = [system_prompt] + prompt
+            else:
+                messages = prompt
+        
         payload = {
-            "model": "deepseek/deepseek-v3",  # Using DeepSeek v3 model
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
+            "model": "openai/gpt-3.5-turbo",  # Using GPT-3.5 for faster responses
+            "messages": messages,
             "temperature": 0.7,
             "max_tokens": 1000
         }
         
         try:
+            print(f"\nSending request to OpenRouter API...")
+            print(f"Messages: {json.dumps(messages, indent=2)}")
+            
             response = requests.post(self.url, headers=headers, json=payload)
             response.raise_for_status()
             
             data = response.json()
+            print(f"OpenRouter API Response: {json.dumps(data, indent=2)}")
+            
             if "choices" in data and len(data["choices"]) > 0:
                 return data["choices"][0]["message"]["content"]
             else:
@@ -67,42 +111,47 @@ class OpenRouterAPI:
 # ------------------------------
 # ElevenLabs Text-to-Speech API
 # ------------------------------
+from elevenlabs import ElevenLabs
+
 class ElevenLabsTTS:
-    def __init__(self, voice_id=None):
+    def __init__(self):
         self.api_key = os.getenv('ELEVEN_API_KEY')
         if not self.api_key:
             raise ValueError("ELEVEN_API_KEY not found in environment variables")
-        # Depending on the ElevenLabs API, the URL might need a voice_id
-        # For now, we assume a generic endpoint:
-        if voice_id is None:
-            self.voice_id = "default_voice"
-        else:
-            self.voice_id = voice_id
-        self.url = f"https://api.elevenlabs.io/v1/text-to-speech/{self.voice_id}"
-    
-    def synthesize(self, text):
-        headers = {
-            "xi-api-key": self.api_key,
-            "Content-Type": "application/json"
-        }
-        payload = {
-            "text": text,
-            # You can include voice settings or other parameters here.
-        }
-        response = requests.post(self.url, headers=headers, json=payload)
-        if response.status_code == 200:
-            return response.content  # Binary audio
-        else:
-            error_msg = f"ElevenLabs API error {response.status_code}: {response.text}"
-            print(error_msg)
-            return None
+        self.voice_id = "pFZP5JQG7iQjQjIQuC4Bku"  # Fixed voice ID for consistency
+        self.client = ElevenLabs(api_key=self.api_key)
 
-    def play_audio(self, audio_content, filename="output.mp3"):
-        # Save the audio content to a file
-        with open(filename, "wb") as f:
-            f.write(audio_content)
-        print(f"Audio saved to {filename}")
-        print("Note: Audio playback is not available. You can play the saved file manually.")
+    def synthesize(self, text):
+        print(f"\nElevenLabs TTS Request:")
+        print(f"Voice ID: {self.voice_id}")
+        print(f"Text: {text[:100]}...")  # Print first 100 chars
+        print(f"Model: eleven_multilingual_v2")
+        print(f"API Key present: {bool(self.api_key)}")
+        
+        try:
+            # Use ElevenLabs client library properly
+            print("Using ElevenLabs client to generate audio stream...")
+            audio_stream = self.client.text_to_speech.convert_as_stream(
+                voice_id=self.voice_id,
+                text=text,
+                model_id="eleven_multilingual_v2",
+                output_format="mp3_22050_32"
+            )
+            
+            if not audio_stream:
+                raise ValueError("Failed to generate audio stream")
+                
+            # Convert generator to bytes
+            audio_data = b''
+            for chunk in audio_stream:
+                audio_data += chunk
+                
+            return audio_data
+            
+        except Exception as e:
+            error_msg = f"ElevenLabs API error: {str(e)}"
+            print(error_msg)
+            raise ValueError(error_msg)
 
 # ------------------------------
 # Phone Calling via Twilio API
@@ -160,11 +209,7 @@ class VoiceAssistant:
     def speak_response(self, text):
         # Convert text to speech via ElevenLabs
         print("Synthesizing speech...")
-        audio = self.tts_engine.synthesize(text)
-        if audio:
-            self.tts_engine.play_audio(audio)
-        else:
-            print("Could not synthesize speech.")
+        return self.tts_engine.synthesize(text)
 
     def handle_interaction(self):
         # Basic interactive loop (could be easily extended to voice input)
@@ -184,7 +229,7 @@ class VoiceAssistant:
 def main():
     try:
         # Instantiate the modules
-        text_generator = OpenRouterAPI()  # Using OpenRouter instead of DeepSeek
+        text_generator = OpenRouterAPI()  # Using OpenRouter for DeepSeek
         tts_engine = ElevenLabsTTS()
         
         try:

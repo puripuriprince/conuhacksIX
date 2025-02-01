@@ -1,0 +1,7 @@
+version: 2
+authtoken: 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
+tunnels:
+  flask-app:
+    proto: http
+    addr: 5000
+    inspect: true
