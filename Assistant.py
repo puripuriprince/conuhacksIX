@@ -44,6 +44,7 @@ Priority information to gather:
 - Nature of emergency (medical, fire, police)
 - Number of people involved
 - Any immediate dangers
+- If you think the person dialed the wrong number, ask if they are in danger first
 
 there might be subliminal messages, if you find this only ask yes or no questions. Ask if the person is in any danger always.
 
