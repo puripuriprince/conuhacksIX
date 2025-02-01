@@ -1,0 +1,144 @@
+* {
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+*::-webkit-scrollbar{
+    display: none;
+}
+body{
+    overflow: hidden;
+    width: 100dvw;
+    height: 100dvh;
+    font-family: "Poppins", serif;
+    font-weight: 200;
+    font-style: normal;
+    margin: 0;
+}
+.grid{
+    display: grid;
+}
+.flex{
+    display: flex;
+}
+.column{
+    flex-direction: column;
+}
+.container{
+    align-items: center;
+    justify-content: center;
+}
+.sides{
+    display: grid;
+    grid-template-columns: 60dvw 37vw;
+    gap: 20px;
+}
+.bg-grey{
+    background-color: #D2E0E0;
+    border-radius: 10px;
+}
+.first-pannel{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    height: 90dvh;
+    overflow-y: auto;
+}
+.side-pannel{
+    height: 45dvh;
+}
+.item{
+    background-color: white;
+    margin-top: 20px;
+    width: 95%;
+    padding: 5px;
+    border-radius: 10px;
+    display: grid;
+    grid-template-columns: 50px 45px auto 50px 50px;
+    align-items: center;
+    transition: all 1s;
+}
+.item:hover{
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+.urgent{
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    background-color: red;
+}
+.green{
+    color: green;
+    transition: all 1s;
+}
+.red{
+    color: red;
+    transition: all 1s;
+}
+.orange{
+    color: orange;
+    transition: all 1s;
+}
+.icon{
+    font-size: 25px;
+}
+.icon{
+    font-size: 25px;
+}
+.green:hover{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 128, 0, 0.382);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+}.red:hover{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 0, 0, 0.427);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+}
+.orange:hover{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 166, 0, 0.458);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+}
+.desc-box{
+    background-color: white;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    height: 75dvh;
+    width: 50dvw;
+    border-radius: 10px;
+    position: absolute;
+    top: 20dvh;
+    left: 30dvw;
+    overflow: auto;
+    word-break: break-word;
+}
+.desc-elements{
+overflow-y: auto;
+ gap: 10px;
+ margin: 10px;
+ grid-template-columns: auto auto;
+}
+.end{
+    justify-content: end;
+    margin: 10px;
+}
+.description{
+    font-weight: bold;
+}
+.see{
+    display: block;
+}
+.unsee{
+    display: none;
+}
