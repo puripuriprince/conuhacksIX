@@ -100,7 +100,6 @@ Your responses should be concise, clear, and focused on gathering essential info
 # ------------------------------
 # ElevenLabs Text-to-Speech API
 # ------------------------------
-from elevenlabs import stream
 from elevenlabs.client import ElevenLabs
 
 class ElevenLabsTTS:
@@ -117,7 +116,7 @@ class ElevenLabsTTS:
                 text=text,
                 output_format="mp3_44100_64",
                 voice_id=self.voice_id,
-                model_id="eleven_multilingual_v2"
+                model_id="eleven_flash_v2"
             )
             return audio_stream
             

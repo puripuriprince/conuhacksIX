@@ -126,9 +126,7 @@ def get_tts_audio(text):
 def root():
     """Play welcome message and redirect to voice handler."""
     response = VoiceResponse()
-    response.play('/static/start_audio.mp3')
-    response.play('/static/questionAdresse.mp3')
-    response.play('/static/questionPhoneNumber.mp3')
+    response.play('/static/nouveau_debut.mp3')
     response.redirect("/voice")
     return Response(str(response), mimetype="application/xml")
 
@@ -220,7 +218,7 @@ def process_voice():
             return Response(str(response), mimetype="application/xml")
         
         # Update conversation history with the assistant's reply
-        update_conversation_history(call_sid, "assistant", "911 assistant what is your emergency? Where are you located at the moment? Can you give me an adress? Can you tell me your phone number?")
+        update_conversation_history(call_sid, "assistant", "911 assistant what is your emergency? We are tracking your gps location and  phone information.")
         
         # Use asynchronous call to ElevenLabs TTS to synthesize the response
         audio_url = None
