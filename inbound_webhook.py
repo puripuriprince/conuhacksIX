@@ -127,6 +127,8 @@ def root():
     """Play welcome message and redirect to voice handler."""
     response = VoiceResponse()
     response.play('/static/start_audio.mp3')
+    response.play('/static/questionAdresse.mp3')
+    response.play('/static/questionPhoneNumber.mp3')
     response.redirect("/voice")
     return Response(str(response), mimetype="application/xml")
 
