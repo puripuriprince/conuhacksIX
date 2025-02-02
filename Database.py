@@ -10,14 +10,24 @@ import subprocess
 import threading
 
 # Noms des fichiers Python à exécuter
-# file1 = "aiDispatcher.py"
+file1 = "aiDispatcher.py"
+import schedule
+import time
+import os
 
+def run_script():
+    print("Exécution du script d'analyse des urgences...")
+    os.system("python script.py")  # Exécuter script.py
 
-# def appel_script():
-#     subprocess.run(["python","-Xfrozen_modules=off", file1])  # Exécute le premier script
-#     threading.Timer(10, appel_script).start()
+# Planifier l'exécution toutes les 20 secondes
+schedule.every(20).seconds.do(run_script)
 
-# appel_script()
+def appel_script():
+    subprocess.run(["python","-Xfrozen_modules=off", file1])  # Exécute le premier script
+    threading.Timer(10, appel_script).start()
+
+#run_script()
+appel_script()
 # Load environment variables
 load_dotenv()
 
