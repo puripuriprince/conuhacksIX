@@ -67,3 +67,4 @@ Emergency dispatch voice assistant that:
 - Debug logs track entire conversation flow
 - High quality voice settings configured in ElevenLabsTTS
 - Server timeout after 30s is normal - use Ctrl+C to stop manually
+- Speech input timeout set to 10 seconds to allow adequate response time
