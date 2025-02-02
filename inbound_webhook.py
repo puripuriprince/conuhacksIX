@@ -15,6 +15,7 @@ from flask import Flask, request, Response, url_for
 from twilio.twiml.voice_response import VoiceResponse, Gather
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
+import aiDispatcher
 
 # Import both our OpenRouter and ElevenLabs modules from our Assistant
 from Assistant import OpenRouterAPI, ElevenLabsTTS
@@ -252,6 +253,9 @@ def process_voice():
                         conversation_text                    # full conversation
                     ])
                 print("Conversation context saved to CSV")
+                # ici on resume
+                aiDispatcher.traiter_csv()
+                # ici in dompe dans la db
             except Exception as e:
                 print(f"Error saving conversation to CSV: {e}")
             
