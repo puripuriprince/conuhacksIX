@@ -15,6 +15,7 @@ import schedule
 import time
 import os
 
+
 # def run_script():
 #     print("Exécution du script d'analyse des urgences...")
 #     os.system("python aiDispatcher.py")  # Exécuter script.py
@@ -24,10 +25,10 @@ import os
 
 # def appel_script():
 #     subprocess.run(["python","-Xfrozen_modules=off", file1])  # Exécute le premier script
-#     threading.Timer(10, appel_script).start()
+#     threading.Timer(10, appel_script()).start()
 
-# #run_script()
-# appel_script()
+#run_script()
+
 # Load environment variables
 load_dotenv()
 

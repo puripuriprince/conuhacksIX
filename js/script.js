@@ -11,6 +11,19 @@ document.addEventListener("DOMContentLoaded", function(){
         "Isabelle Lefevre",
         "Antoine Gauthier"
     ];    
+    function populate(){
+        let side =  document.getElementById('sidePannel');
+        console.log(side);
+        for(let i = 0; i < names.length;i++){
+            side.innerHTML += `
+            <div class="user-item">
+            <i class="fa-solid fa-user icon user"></i>
+            <p>${names[i]}</p>
+        </div>`;
+        };
+    }
+    populate();
+
     let dataCache = [];  // Cache the fetched data
     function formatPhoneNumber(phoneNumberString) {
         var cleaned = ('' + phoneNumberString).replace(/\D/g, '');
