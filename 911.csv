@@ -1,9 +1,11 @@
 location, phone_number, situation, timestamp, call_sid, conversation
-"Street 18, Montreal",4731837235,I'm hearing strange noises,,,
-"Street 11, Montreal",4274953838,"I can't breathe, I need oxygen",,,
-"Street 30, Montreal",4255935143,I saw a suspicious person in the neighborhood,,,
+"Street 18, Montreal",4731837235,I'm hearing strange noises
+"Street 11, Montreal",4274953838,"I can't breathe, I need oxygen"
+"Street 30, Montreal",4255935143,I saw a suspicious person in the neighborhood
 "Street 76, Montreal",4237271335,Someone is unresponsive,,,
-"Street 46, Montreal",4859762436,I'm hearing strange noises,,,
-"Street 31, Montreal",4547332440,There is a fire in the building,,,
-"Street 77, Montreal",4674232311,"I need help, I've been robbed",,,
-"Street 66, Montreal",4887855302,I saw a person with a weapon,,,
+"Street 46, Montreal",4859762436,I'm hearing strange noises
+"Street 31, Montreal",4547332440,There is a fire in the building
+"Street 77, Montreal",4674232311,"I need help, I've been robbed"
+"Street 66, Montreal",4887855302,I saw a person with a weapon
+2025-02-01 23:03:11,CA799dcb1b8d02d047b40552f6328f8034,My life is in danger. Say the word. Bye. Goodbye or information.
+2025-02-01 23:09:38,CAfd3e1c1aee34c7bd2062634488eafc7f,"Hi. Can I get a large pizza, please?  Please. Are you in danger? What kind of help do you need? Yes, I needed at 123 avocado lane.  Exercise delivery. We have your information. Help is on the way to 123 Avocado Lane. Stay safe. Can you stay on the line? Yes. Thank you. I'll see you later for the pizza. Bye."

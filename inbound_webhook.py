@@ -235,14 +235,22 @@ def process_voice():
         print(f"\nUser Speech: {speech_text}")
         update_conversation_history(call_sid, "user", speech_text)
         
-        if any(exit_word in speech_text.lower() for exit_word in ["goodbye", "bye", "exit", "quit","information"]):
+        if any(exit_word in speech_text.lower() for exit_word in ["goodbye", "bye", "exit", "quit", "information"]):
             print("Exit word detected, ending call")
             try:
-                with open('911.csv', 'a', newline='') as csvfile:
+                # Extract location, phone, and situation from conversation
+                context = get_conversation_context(call_sid)
+                conversation_text = ' '.join([msg['content'] for msg in context])
+                
+                # Open CSV in append mode
+                with open('911.csv', 'a', newline='', encoding='utf-8') as csvfile:
                     writer = csv.writer(csvfile)
-                    context = get_conversation_context(call_sid)
-                    conversation_text = ' '.join([msg['content'] for msg in context])
-                    writer.writerow([time.strftime("%Y-%m-%d %H:%M:%S"), call_sid, conversation_text])
+                    # Write timestamp, call_sid, and full conversation text
+                    writer.writerow([
+                        time.strftime("%Y-%m-%d %H:%M:%S"),  # timestamp
+                        call_sid,                            # call_sid
+                        conversation_text                    # full conversation
+                    ])
                 print("Conversation context saved to CSV")
             except Exception as e:
                 print(f"Error saving conversation to CSV: {e}")

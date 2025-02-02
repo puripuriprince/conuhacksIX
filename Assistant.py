@@ -104,7 +104,7 @@ Remember:
             response.raise_for_status()
             
             data = response.json()
-            print(f"OpenRouter API Response: {json.dumps(data, indent=2)}")
+            # print(f"OpenRouter API Response: {json.dumps(data, indent=2)}")
             
             if "choices" in data and len(data["choices"]) > 0:
                 # Clean up response text to prevent unwanted line breaks
