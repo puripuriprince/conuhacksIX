@@ -1,6 +1,38 @@
 document.addEventListener("DOMContentLoaded", function(){
-    let dataCache = [];  // Cache the fetched data
+    let names = [
+        "Alice Dupont",
+        "Pierre Martin",
+        "Sophie Lefevre",
+        "Louis Bernard",
+        "Claire Moreau",
+        "Marc Robert",
+        "Juliette Dufresne",
+        "Vincent Lemoine",
+        "Isabelle Lefevre",
+        "Antoine Gauthier"
+    ];    
+    function populate(){
+        let side =  document.getElementById('sidePannel');
+        console.log(side);
+        for(let i = 0; i < names.length;i++){
+            side.innerHTML += `
+            <div class="user-item">
+            <i class="fa-solid fa-user icon user"></i>
+            <p>${names[i]}</p>
+        </div>`;
+        };
+    }
+    populate();
 
+    let dataCache = [];  // Cache the fetched data
+    function formatPhoneNumber(phoneNumberString) {
+        var cleaned = ('' + phoneNumberString).replace(/\D/g, '');
+        var match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+        if (match) {
+          return '(' + match[1] + ') ' + match[2] + '-' + match[3];
+        }
+        return null;
+      }
     // Event listener for opening the description box
     document.getElementById('containerContent').addEventListener("click", function(event){
         if(event.target.classList.contains("openup") || event.target.id == "close"){
@@ -18,12 +50,14 @@ document.addEventListener("DOMContentLoaded", function(){
                     // Populate the description box with relevant information
                     contentBox.innerHTML = `   
                             <strong>Category:</strong><p id="category">${itemData.category}</p>
-                            <strong>Phone:</strong><p id="phone">${itemData.phone}</p>
+                            <strong>Phone:</strong><p id="phone">${formatPhoneNumber(itemData.phone)}</p>
                             <strong>${itemData.description.substring(0,8)}</strong><p id="desc">${itemData.description.substring(8,itemData.description.lenght)}</p>
                             `;
                 }
             }
-            let deleteId = document.getElementById('')
+            if(event.target.classList.contains('accept') || event.target.classList.contains('decline')){
+                deleteItem(event.target.id);
+            }
     });
 
     function informtionItem(data){
@@ -34,8 +68,7 @@ document.addEventListener("DOMContentLoaded", function(){
             if (!dataCache.some(item => item._id === element._id)) {  // Éviter les doublons
                 dataCache.push(element);
             }
-    
-            itemContainer.innerHTML += `  <!-- Use innerHTML += to append, not overwrite -->
+            itemContainer.innerHTML += `
                 <div class="item">
                     <div class="u${element.priority}"></div>
                     <div class="flex container">
@@ -75,7 +108,6 @@ document.addEventListener("DOMContentLoaded", function(){
         .then(data => {
             console.log(data);
             if (data.message) {
-                alert("Item deleted successfully");
                 fetchData(); // Refresh the data
             } else {
                 alert("Error: " + data.error);
