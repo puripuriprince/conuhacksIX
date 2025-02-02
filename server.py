@@ -23,9 +23,10 @@ class Database:
         self.db = db
         self.collection = collection
 
-    def insert_info(self, username, address, phone, priority, description, title):
+    def insert_info(self, category, address, phone, priority, description, title):
         new_request = {
-            "username": username,
+            #"username": username,
+            "category": category,
             "address": address,
             "phone": phone,
             "priority": priority,
