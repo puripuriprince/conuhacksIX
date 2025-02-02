@@ -75,7 +75,7 @@ Your responses should be concise, clear, and focused on gathering essential info
         
         try:
             print(f"\nSending request to OpenRouter API...")
-            print(f"Messages: {json.dumps(messages, indent=2)}")
+            # print(f"Messages: {json.dumps(messages, indent=2)}")
             
             response = requests.post(self.url, headers=headers, json=payload)
             response.raise_for_status()
