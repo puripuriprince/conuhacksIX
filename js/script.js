@@ -17,23 +17,26 @@ document.addEventListener("DOMContentLoaded", function(){
 
                     // Populate the description box with relevant information
                     contentBox.innerHTML = `   
-                            <p>Category:</p><p id="category">${itemData.category}</p>
-                            <p>Phone:</p><p id="phone">${itemData.phone}</p>
-                            <p>Description:</p><p id="desc">${itemData.description}</p>
+                            <strong>Category:</strong><p id="category">${itemData.category}</p>
+                            <strong>Phone:</strong><p id="phone">${itemData.phone}</p>
+                            <strong>${itemData.description.substring(0,8)}</strong><p id="desc">${itemData.description.substring(8,itemData.description.lenght)}</p>
                             `;
                 }
             }
     });
 
     function informtionItem(data){
+        dataCache = [];  //  Réinitialiser le cache
         let itemContainer = document.getElementById('contentItems');
+        itemContainer.innerHTML = "";
         data.forEach(element => {
-            // Cache the data for later use
-            dataCache.push(element);
+            if (!dataCache.some(item => item._id === element._id)) {  // Éviter les doublons
+                dataCache.push(element);
+            }
     
             itemContainer.innerHTML += `  <!-- Use innerHTML += to append, not overwrite -->
                 <div class="item">
-                    <div class="urgent"></div>
+                    <div class="u${element.priority}"></div>
                     <div class="flex container">
                         <i class="fa-solid fa-exclamation orange icon openup" title="description" id="${element._id}"></i>
                     </div>

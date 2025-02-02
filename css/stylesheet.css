@@ -61,11 +61,23 @@ body{
 .item:hover{
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
-.urgent{
+.u1{
     height: 30px;
     width: 30px;
     border-radius: 50%;
     background-color: red;
+}
+.u2{
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    background-color: yellow;
+}
+.u3{
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    background-color: green;
 }
 .green{
     color: green;
@@ -141,4 +153,7 @@ overflow-y: auto;
 }
 .unsee{
     display: none;
+}
+strong{
+    align-self: center;
 }

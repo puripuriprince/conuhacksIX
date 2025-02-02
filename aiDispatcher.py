@@ -147,6 +147,76 @@ def main():
             phone.pop(0)
 
     def recuperer_info(situation):
+         # Le rang de la situation
+        prompt_category = """Class the situation in one of these category : Police Emergencies, Firefighter Emergencies, Medical Emergencies, Unknown  respond only with the name of the category and nothing else :
+        Police Emergencies 🚔
+1. Urgent (Immediate danger, requires immediate police intervention)
+"Someone is trying to break into my house right now!"
+"I just heard gunshots in the street!"
+"A person with a weapon is threatening someone in a store!"
+"A woman is being assaulted right in front of me!"
+2. Moderate (Concerning situation requiring a police response, but not immediately life-threatening)
+"A fight just broke out in front of a bar, and people are getting aggressive."
+"A suspicious car has been parked in front of my house for hours, and someone inside seems to be watching me."
+"My neighbor is yelling and breaking things, I’m worried someone might get hurt."
+"I saw someone trying to open multiple car doors in the parking lot."
+3. Low Severity (Not urgent, can be reported later)
+"I noticed someone spray-painted graffiti on a nearby wall."
+"My bicycle was stolen overnight, and I’d like to file a report."
+"There are people hanging around my neighborhood late at night, it makes me uneasy."
+"I received a suspicious phone call that seemed like a scam attempt."
+4. Undetermined (Lack of details or unclear situation)
+"Something strange is happening in front of my house."
+"I’m not sure, but something feels off in my building."
+"A group of people is talking loudly outside, and I have a bad feeling."
+"I think someone might be following me, but I’m not sure."
+
+Firefighter Emergencies 🚒🔥
+1. Urgent (Immediate danger, requires immediate firefighter intervention)
+"My kitchen is on fire, and the flames are spreading!"
+"A building across the street is on fire, and the smoke is getting thick!"
+"A wildfire is spreading quickly toward houses!"
+"There was an explosion in a warehouse, and people might still be inside!"
+2. Moderate (Potential risk, requiring quick firefighter response)
+"I saw some teenagers starting a fire in an empty lot, and it could spread."
+"A power pole caught fire after a storm, and there are sparks."
+"A neighbor’s chimney is emitting thick black smoke, more than usual."
+"There’s a gas leak in my building, but I can’t smell a strong odor yet."
+3. Low Severity (Not urgent, but might require follow-up or monitoring)
+"I noticed a faint smell of something burning in my building, but I don’t see smoke or flames."
+"There’s a wasp nest under my roof, and I’m wondering if the firefighters can help."
+"A tree fell on the road after a storm, but it’s not completely blocking traffic."
+"I saw a small pile of smoldering ashes in the park, and I put water on it, but it could reignite."
+4. Undetermined (Lack of details or unclear situation)
+"I think I see smoke somewhere, but I’m not sure where it’s coming from."
+"I hear a fire alarm going off in my neighborhood, but I don’t see anything."
+"Someone shouted ‘fire’ in the street, but I don’t see flames."
+"It feels unusually hot in my house, but I can’t find the source."
+
+Medical Emergencies 🚑
+1. Urgent (Immediate danger, requires immediate medical intervention)
+"My father collapsed and isn’t breathing!"
+"I’m having sudden, intense chest pain, and I can’t breathe properly!"
+"Someone was in a car accident, they’re bleeding heavily and not moving!"
+"A child swallowed something and is choking!"
+2. Moderate (Concerning medical condition requiring urgent care but not life-threatening)
+"I have had a high fever and severe muscle pain for three days."
+"I have had sharp stomach pain for hours."
+"I twisted my ankle while running, and it’s swollen. I can’t walk properly."
+"My child has vomited multiple times today and seems very weak."
+3. Low Severity (Non-urgent medical concerns, can be managed with basic care or a scheduled appointment)
+"I have a small cut on my finger, but it has stopped bleeding."
+"I’ve had a cold for a few days and need advice on what to take."
+"My child has a small bruise on their knee after falling but is walking fine."
+"I have mild back pain after lifting something, but it gets better with rest."
+4. Undetermined (Lack of details or unclear situation)
+"I don’t feel well."
+"There’s a problem, but I don’t know what to do."
+"Someone fell, but I don’t know if they are okay."
+"I have pain somewhere, but it’s hard to describe."
+
+"""    
+        category = classifier_info_urgence(situation, prompt_category)
         # Le rang de la situation
         prompt_rang = """Class the situation from 1 to 4 on a level of urgency, 1 being the most urgent, respond only with the number and the number only.
         Police Emergencies 🚔
@@ -223,7 +293,7 @@ Medical Emergencies 🚑
         # Courte description de la situation
         prompt_resume = """Given a description of an emergency situation, generate a short summary of the situation. The summary should be brief (2-3 sentences) and provide a quick overview of the main events or issues."""
         descr = classifier_info_urgence(situation, prompt_resume)
-        return [rang, descr, titr]
+        return [rang, descr, titre, category]
 
     def classifier_info_urgence(situation, prompt):
         try:
@@ -251,20 +321,31 @@ Medical Emergencies 🚑
             if len(rows) <= 1:  # Si le fichier est vide (ou juste l'entête)
                 print("Fichier vide ou plus de données à traiter.")
                 return
-
+            
             # Parcours chaque ligne après l'entête
-            for i, ligne in enumerate(rows[1:], start=1):  # Ignorer l'entête
-                location = ligne[0]  # Localisation
-                phone = ligne[1]  # Numéro de téléphone
-                situation = ligne[2]  # Description de la situation
+        rows_to_keep = []  # Liste pour stocker les lignes non traitées
 
-                # Traiter la situation
-                array = recuperer_info(situation)  # Passer à la fonction qui analyse la situation
-                database.insert_info(location, phone, array[0], array[1], array[2])
+        for ligne in rows[1:]:  # Ignorer l'entête
+            location = ligne[0]  # Localisation
+            phone = ligne[1]  # Numéro de téléphone
+            situation = ligne[2]  # Description de la situation
+
+    # Traiter la situation
+    array = recuperer_info(situation)  # Passer à la fonction qui analyse la situation
+    database.insert_info(location, phone, array[0], array[1], array[2], array[3])
+            # # Parcours chaque ligne après l'entête
+            # for i, ligne in enumerate(rows[1:], start=1):  # Ignorer l'entête
+            #     location = ligne[0]  # Localisation
+            #     phone = ligne[1]  # Numéro de téléphone
+            #     situation = ligne[2]  # Description de la situation
+
+            #     # Traiter la situation
+            #     array = recuperer_info(situation)  # Passer à la fonction qui analyse la situation
+            #     database.insert_info(location, phone, array[0], array[1], array[2], array[3])
                 
-                # Supprimer la ligne traitée
-                rows.pop(i)  # Supprimer la ligne traitée (la ligne de l'urgence)
-                break  # On arrête après une seule ligne traitée
+            #     # Supprimer la ligne traitée
+            #     rows.pop(i)  # Supprimer la ligne traitée (la ligne de l'urgence)
+            #     break  # On arrête après une seule ligne traitée
 
             # Réécrire le fichier sans la ligne traitée
             with open("911.csv", mode='w', encoding='utf-8', newline='') as file:
