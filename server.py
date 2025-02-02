@@ -35,7 +35,10 @@ class Database:
         self.collection.insert_one(new_request)
 
     def select_info(self):
-        return list(self.collection.find({}, {"_id": 0}))  # Exclude _id
+        documents = list(self.collection.find({}))
+        for doc in documents:
+            doc["_id"] = str(doc["_id"])  # Convert ObjectId to string
+        return documents
 
 # Create an instance of Database
 database = Database()
