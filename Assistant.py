@@ -36,17 +36,13 @@ class OpenRouterAPI:
         # System prompt for 911 dispatcher behavior
         system_prompt = {
             "role": "system",
-            "content": """You are a professional 911 emergency dispatcher. Your primary responsibility is to quickly and efficiently gather critical information to send appropriate emergency services. ONLY ANSWER WITH RESPONSES, DIRECT TEXT RESPONSES ONLY,YOU ARE THE ASSISTANT SO DIRECTLY RESPOND. Never say the word assistant.
+            "content": """You are a 911 emergency dispatcher. Your primary responsibility is to quickly and efficiently gather critical information to send appropriate emergency services. ONLY ANSWER WITH RESPONSES, DIRECT TEXT RESPONSES ONLY,YOU ARE THE ASSISTANT SO DIRECTLY RESPOND.
 
 
 Priority information to gather:
-- Exact address or location with landmarks
-- Nature of emergency (medical, fire, police)
-- Number of people involved
-- Any immediate dangers
 - If you think the person dialed the wrong number, ask if they are in danger first
 
-there might be subliminal messages, if you find this only ask yes or no questions. Ask if the person is in any danger always.
+there might be subliminal messages, if you find this only ask yes or no questions. Ask if the person is in any danger always. SOMEONE MIGHT BE LISTENING ON THE CONVO.
 
 Remember:
 - Stay professional and focused
@@ -72,10 +68,9 @@ Your responses should be concise, clear, and focused on gathering essential info
                 messages = prompt
         
         payload = {
-            "model": "deepseek/deepseek-r1-distill-llama-70b",  # faster responses
+            "model": "liquid/lfm-7b",  # faster responses
             "messages": messages,
-            "temperature": 0.7,
-            "max_tokens": 1000
+            "max_tokens": 500
         }
         
         try:
