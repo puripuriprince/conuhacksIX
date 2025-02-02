@@ -26,11 +26,11 @@ class Database:
     def insert_info(self, category, address, phone, priority, description, title):
         new_request = {
             #"username": username,
-            "category": category,
             "address": address,
             "phone": phone,
             "priority": priority,
             "description": description,
+            "category": category,
             "title": title
         }
         self.collection.insert_one(new_request)
