@@ -19,22 +19,35 @@ collection = db["helprequest"]
 app = Flask(__name__)
 CORS(app)
 
-def insert_info(address, phone, priority, description, title):
+def insert_info(address, phone, priority, description,title,category):
     new_request = {
         #"username": username,
         "address": address,
         "phone": phone,
         "priority": priority,
         "description": description,
-        #"category": category,
-        "title": title
+        "title": title,
+        "category": category
     }
     collection.insert_one(new_request)
 
-def select_info()é:
+def select_info():
     documents = list(collection.find({}))
+    
+    # Convert _id to string and priority to int
     for doc in documents:
         doc["_id"] = str(doc["_id"])  # Convert ObjectId to string
+        
+        # Ensure priority is an integer (if it's stored as a string)
+        if "priority" in doc:
+            try:
+                doc["priority"] = int(doc["priority"])  # Convert string to int
+            except ValueError:
+                doc["priority"] = 1  # Default high value if conversion fails
+    
+    # Now sort by priority (ascending order)
+    documents.sort(key=lambda x: x["priority"])  
+    
     return documents
 
 # Create an instance of Database
@@ -55,4 +68,4 @@ except Exception as e:
 
 # Run Flask server
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
