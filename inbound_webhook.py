@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Updated inbound_webhook.py integrating ElevenLabs TTS
-with proper asynchronous handling, conversation context,
-and error fallbacks.
+Updated inbound_webhook.py integrating asynchronous AI processing for Twilio calls.
+It now offloads AI text generation and TTS synthesis to a background thread so that
+the Twilio connection is not dropped while waiting for a 5‑10 second response.
 """
 
 import os
@@ -10,6 +10,7 @@ import json
 import time
 import datetime
 import threading
+import csv
 from flask import Flask, request, Response, url_for
 from twilio.twiml.voice_response import VoiceResponse, Gather
 from dotenv import load_dotenv
@@ -35,8 +36,7 @@ if not os.path.exists(STATIC_DIR):
 # Initialize OpenRouter API (for generating AI text)
 openrouter_api = OpenRouterAPI()
 
-# Ensure the static directory exists (to serve synthesized audio files)
-STATIC_DIR = os.path.join(os.getcwd(), "static")
+# (Re)create static directory (if needed)
 if not os.path.exists(STATIC_DIR):
     os.makedirs(STATIC_DIR)
 
@@ -46,11 +46,10 @@ if not os.path.exists(start_audio_path):
     print(f"Warning: Required start_audio.mp3 not found at: {start_audio_path}")
 
 # Dictionary to keep conversation history in memory per Twilio CallSid.
-# (In production an external persistent store is recommended.)
 conversation_history = {}
 
 def cleanup_file_later(file_path, delay=600):
-    """Delete the specified file after 'delay' seconds."""
+    """Delete the specified file later."""
     def remove_file():
         try:
             os.remove(file_path)
@@ -70,46 +69,31 @@ def update_conversation_history(call_sid, role, content):
     """Append a message to the conversation history for this call."""
     history = get_conversation_context(call_sid)
     history.append({"role": role, "content": content})
-    # Limit context to the last 5 messages
     conversation_history[call_sid] = history[-5:]
 
 def build_prompt_from_history(call_sid):
-    """Combine conversation history into a single prompt string.
-    Each turn is prefixed with 'User:' or 'Assistant:'."""
+    """Combine conversation history into a single prompt string."""
     history = get_conversation_context(call_sid)
     prompt = "\n".join(f"{msg['role'].capitalize()}: {msg['content']}" for msg in history)
     return prompt
 
-
-#- Exact address or location with landmarks
-#- Nature of emergency (medical, fire, police)
-#- Number of people involved
-#- Any immediate dangers
-
-
 # ----------------------------
-# ElevenLabs TTS Asynchronous call helper
+# ElevenLabs TTS Asynchronous call helper (unchanged)
 # ----------------------------
 
 def get_tts_audio(text):
-    """
-    Get the ElevenLabs audio data for the given text.
-    """
+    """Get the ElevenLabs audio data for the given text."""
     try:
         print("\nStarting ElevenLabs synthesis...")
         tts_engine = ElevenLabsTTS()
         audio_data = tts_engine.synthesize(text)
         
         if audio_data:
-            # Save audio data to a temporary file
             temp_file = os.path.join(STATIC_DIR, f"response_{int(time.time())}.mp3")
             with open(temp_file, 'wb') as f:
                 f.write(audio_data)
             
-            # Schedule cleanup
             cleanup_file_later(temp_file)
-            
-            # Return path relative to static directory
             return f"/static/{os.path.basename(temp_file)}"
         else:
             print("Warning: No audio data received from synthesize()")
@@ -119,7 +103,72 @@ def get_tts_audio(text):
         raise
 
 # ----------------------------
-# Define our Twilio routes
+# Global asynchronous task support
+# ----------------------------
+
+# Create a global ThreadPoolExecutor and a dictionary to hold tasks per CallSid.
+executor = ThreadPoolExecutor(max_workers=5)
+ai_tasks = {}
+
+def process_ai_response(call_sid, prompt):
+    """
+    Background task that generates AI text and synthesizes TTS audio.
+    This function returns the relative URL of the synthesized audio file.
+    """
+    try:
+        print(f"\nGenerating AI response asynchronously for Call SID: {call_sid}")
+        ai_reply = openrouter_api.generate_text(prompt)
+        print(f"AI Response: {ai_reply}")
+    except Exception as e:
+        ai_reply = "I'm sorry, I'm having trouble understanding you right now. Please try again later."
+        print("Error in AI generation:", e)
+    # Update conversation history with the assistant’s reply.
+    update_conversation_history(call_sid, "assistant", ai_reply)
+    try:
+        audio_url = get_tts_audio(ai_reply)
+        print(f"Audio synthesis complete. URL: {audio_url}")
+    except Exception as e:
+        print("Error synthesizing TTS audio asynchronously:", e)
+        raise e
+    return audio_url
+
+# ----------------------------
+# New route to poll for asynchronous response
+# ----------------------------
+
+@app.route("/check_ai", methods=["GET", "POST"])
+def check_ai():
+    call_sid = request.values.get('CallSid')
+    response = VoiceResponse()
+    if not call_sid or call_sid not in ai_tasks:
+        # No background task found? Continue gathering.
+        gather = Gather(input="speech", action="/process_voice", method="POST", timeout=10)
+        response.append(gather)
+        return Response(str(response), mimetype="application/xml")
+    future = ai_tasks[call_sid]
+    if not future.done():
+        # Still processing – pause briefly and poll again.
+        response.pause(length=1)
+        response.redirect(url_for("check_ai", CallSid=call_sid))
+        return Response(str(response), mimetype="application/xml")
+    try:
+        audio_url = future.result()
+    except Exception as e:
+        print("Error in background AI processing:", e)
+        response.play('/static/error_audio.mp3')
+        response.hangup()
+        return Response(str(response), mimetype="application/xml")
+    # If the background work succeeded, play the TTS synthesized audio.
+    response.play(audio_url)
+    response.pause(length=1)
+    gather = Gather(input="speech", action="/process_voice", method="POST", timeout=10)
+    response.append(gather)
+    # Remove the completed task from our lookup.
+    del ai_tasks[call_sid]
+    return Response(str(response), mimetype="application/xml")
+
+# ----------------------------
+# Twilio routes
 # ----------------------------
 
 @app.route("/", methods=["POST"])
@@ -132,7 +181,6 @@ def root():
 
 @app.after_request
 def after_request(response):
-    """Bypass ngrok browser warning."""
     response.headers["ngrok-skip-browser-warning"] = "true"
     return response
 
@@ -140,7 +188,7 @@ def after_request(response):
 def voice():
     """
     Twilio calls this when a new call comes in.
-    It plays the welcome message and uses <Gather> with speech input.
+    It plays the welcome message and uses <Gather> for speech input.
     """
     response = VoiceResponse()
     call_sid = request.values.get('CallSid')
@@ -149,17 +197,12 @@ def voice():
     print(f"Call SID: {call_sid}")
     print(f"Time: {datetime.datetime.now()}")
     
-    # Initialize conversation context for this call if needed
     get_conversation_context(call_sid)
     
-    # Set up a Gather with speech input
     gather = Gather(input="speech", action="/process_voice", method="POST", timeout=10)
     response.append(gather)
-    
-    # If nothing is received, play greeting again
     response.play('/static/start_audio.mp3')
     
-    # Clean up conversation history on hangup
     if call_sid in conversation_history:
         del conversation_history[call_sid]
     
@@ -168,18 +211,19 @@ def voice():
 @app.route("/process_voice", methods=["POST"])
 def process_voice():
     """
-    Receives the caller's speech, generates a reply using conversation context,
-    synthesizes audio with ElevenLabs (async), and returns a TwiML response.
+    Receives the caller's speech, updates the conversation context,
+    and then offloads AI text generation and TTS synthesis asynchronously.
+    The caller is immediately informed to “hold” and the call is redirected
+    to '/check_ai' for polling the result.
     """
     response = VoiceResponse()
     call_sid = request.values.get('CallSid')
     
-    # Debug logging
     print("\n=== New Voice Request ===")
     print(f"Call SID: {call_sid}")
     print(f"Time: {datetime.datetime.now()}")
     
-    base_url = request.host_url  # e.g. https://your-ngrok-subdomain.ngrok.io/
+    base_url = request.host_url
     speech_text = request.values.get("SpeechResult", "").strip()
     
     if not speech_text:
@@ -188,15 +232,11 @@ def process_voice():
         return Response(str(response), mimetype="application/xml")
     
     try:
-        # Update conversation with user's input
         print(f"\nUser Speech: {speech_text}")
         update_conversation_history(call_sid, "user", speech_text)
         
-        # Check if the conversation should end
-        if any(exit_word in speech_text.lower() for exit_word in ["goodbye", "bye", "exit", "quit"]):
+        if any(exit_word in speech_text.lower() for exit_word in ["goodbye", "bye", "exit", "quit","information"]):
             print("Exit word detected, ending call")
-            
-            # Dump conversation context to CSV before ending
             try:
                 with open('911.csv', 'a', newline='') as csvfile:
                     writer = csv.writer(csvfile)
@@ -207,90 +247,31 @@ def process_voice():
             except Exception as e:
                 print(f"Error saving conversation to CSV: {e}")
             
-            response.play('/static/goodbye_audio.mp3')  # Optional: custom goodbye message
+            response.play('/static/goodbye_audio.mp3')
             response.hangup()
             if call_sid in conversation_history:
                 del conversation_history[call_sid]
             return Response(str(response), mimetype="application/xml")
         
-        # Build the prompt from conversation history to provide context
+        # Build the prompt based on conversation history.
         prompt = build_prompt_from_history(call_sid)
         
-        # Generate AI reply from OpenRouter API using the full conversation context
-        try:
-            print(f"\nGenerating AI response...")
-            print(f"Prompt context:\n{prompt}")
-            ai_reply = openrouter_api.generate_text(prompt)
-            print(f"AI Response: {ai_reply}")
-            
-            # Check if the AI response contains the trigger phrase
-            if "we have your information" in ai_reply.lower():
-                # Dump conversation context to CSV
-                try:
-                    with open('911.csv', 'a', newline='') as csvfile:
-                        writer = csv.writer(csvfile)
-                        context = get_conversation_context(call_sid)
-                        conversation_text = ' '.join([msg['content'] for msg in context])
-                        writer.writerow([time.strftime("%Y-%m-%d %H:%M:%S"), call_sid, conversation_text])
-                    print("Conversation context saved to CSV")
-                except Exception as e:
-                    print(f"Error saving conversation to CSV: {e}")
-        except Exception as e:
-            error_text = "I'm sorry, I'm having trouble understanding you right now. Please try again later."
-            response.say("We're experiencing technical difficulties. Please try again.")
-            print("Error from OpenRouter API:", e)
-            response.hangup()
-            return Response(str(response), mimetype="application/xml")
+        # Offload the heavy AI text generation and TTS synthesis in background.
+        future = executor.submit(process_ai_response, call_sid, prompt)
+        ai_tasks[call_sid] = future
         
-        # Update conversation history with the assistant's reply
-        update_conversation_history(call_sid, "assistant", "911 assistant what is your emergency? We are tracking your gps location and  phone information.")
-        
-        # Use asynchronous call to ElevenLabs TTS to synthesize the response
-        audio_url = None
-        try:
-            print("\nStarting ElevenLabs synthesis...")
-            print(f"Audio synthesis complete. URL: {audio_url}")
-        except TimeoutError:
-            print("ElevenLabs TTS synthesis timed out.")
-        except Exception as e:
-            print("Exception during TTS synthesis:", e)
-        
-        # Get TTS audio
-        try:
-            print("\nStarting TTS stream synthesis...")
-            tts_engine = ElevenLabsTTS()
-            audio_stream = tts_engine.synthesize(ai_reply)
-            
-            # Save audio stream to temporary file
-            temp_file = os.path.join(STATIC_DIR, f"response_{int(time.time())}.mp3")
-            with open(temp_file, 'wb') as f:
-                for chunk in audio_stream:
-                    if isinstance(chunk, bytes):
-                        f.write(chunk)
-            
-            # Schedule cleanup
-            cleanup_file_later(temp_file)
-            
-            # Play the temporary file
-            response.play(url_for('static', filename=os.path.basename(temp_file)))
-                
-        except Exception as e:
-            print(f"Error getting TTS stream: {str(e)}")
-            print(f"Error type: {type(e)}")
-            raise  # Re-raise to fail the request - no fallback
-        
-        response.pause(length=1)
-        
-        # Continue listening without a prompt
-        gather = Gather(input="speech", action="/process_voice", method="POST", timeout=10)
-        response.append(gather)
+        # Inform the caller to hold while the processing is in progress.
+        response.say("Please hold while we process your request.")
+        response.redirect("/check_ai?CallSid=" + call_sid)
         
     except Exception as e:
         print("Unexpected error in process_voice:", e)
-        response.play('/static/error_audio.mp3')  # Optional: custom error message
+        response.play('/static/error_audio.mp3')
         response.hangup()
     
     return Response(str(response), mimetype="application/xml")
+
+# ... other routes or code remain unchanged ...
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

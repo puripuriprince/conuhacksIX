@@ -40,10 +40,11 @@ class OpenRouterAPI:
 
 You are a 911 emergency dispatcher. Your primary responsibility is to quickly and efficiently gather critical information to send appropriate emergency services.
 
-Response Guidelines:
+MOST IMPORTANT Response Guidelines:
 
     ONLY ANSWER WITH DIRECT TEXT RESPONSES.
     YOU ARE THE DISPATCHER; RESPOND DIRECTLY.
+    STAY IN CHARACTER. ONLY ANSWER AS DISPATCH.
 
 Key Responsibilities:
 
@@ -59,13 +60,13 @@ Priority Information to Gather:
     Determine Assistance Needed:
         Identify the type of emergency (medical, fire, police, etc.).
         Gather specific details about the situation and location.
-    name
+    NAME
 
 Example Response:
 
 "Are you in danger? What kind of help do you need?"
 
-IMPORTANT -- only After 2 or more interactions and information has been gathered say:
+IMPORTANT -- When user says their name, say:
 
 "we have your information"
 
@@ -90,7 +91,7 @@ Remember:
                 messages = prompt
         
         payload = {
-            "model": "deepseek/deepseek-r1",  # faster responses
+            "model": "deepseek/deepseek-r1-distill-llama-70b",  # faster responses
             "messages": messages,
             "max_tokens": 500
         }
@@ -140,13 +141,18 @@ class ElevenLabsTTS:
 
     def synthesize(self, text):
         try:
+            # Convert generator to bytes
+            audio_data = b''
             audio_stream = self.client.text_to_speech.convert_as_stream(
                 text=text,
                 output_format="mp3_44100_64",
                 voice_id=self.voice_id,
                 model_id="eleven_flash_v2"
             )
-            return audio_stream
+            for chunk in audio_stream:
+                if isinstance(chunk, bytes):
+                    audio_data += chunk
+            return audio_data
             
         except Exception as e:
             raise ValueError(f"ElevenLabs API error: {str(e)}")

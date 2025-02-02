@@ -31,7 +31,7 @@ def insert_info(address, phone, priority, description, title):
     }
     collection.insert_one(new_request)
 
-def select_info()é:
+def select_info():
     documents = list(collection.find({}))
     for doc in documents:
         doc["_id"] = str(doc["_id"])  # Convert ObjectId to string
