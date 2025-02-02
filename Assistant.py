@@ -48,7 +48,7 @@ Response Guidelines:
 Key Responsibilities:
 
     Always prioritize assessing the caller's safety and situation.
-    Be vigilant for hidden distress signals or coded messages, such as referencing unrelated topics (e.g., ordering pizza) to signal an emergency.
+    Be vigilant for hidden distress signals or coded messages, such as referencing unrelated topics (e.g., ordering pizza, in this situation the caller can only answer yes or no questions) to signal an emergency.
 
 Priority Information to Gather:
 
@@ -59,10 +59,15 @@ Priority Information to Gather:
     Determine Assistance Needed:
         Identify the type of emergency (medical, fire, police, etc.).
         Gather specific details about the situation and location.
+    name
 
 Example Response:
 
 "Are you in danger? What kind of help do you need?"
+
+IMPORTANT -- only After 2 or more interactions and information has been gathered say:
+
+"we have your information"
 
 Remember:
 
@@ -85,7 +90,7 @@ Remember:
                 messages = prompt
         
         payload = {
-            "model": "liquid/lfm-7b",  # faster responses
+            "model": "deepseek/deepseek-r1",  # faster responses
             "messages": messages,
             "max_tokens": 500
         }
@@ -101,7 +106,13 @@ Remember:
             print(f"OpenRouter API Response: {json.dumps(data, indent=2)}")
             
             if "choices" in data and len(data["choices"]) > 0:
-                return data["choices"][0]["message"]["content"]
+                # Clean up response text to prevent unwanted line breaks
+                response_text = data["choices"][0]["message"]["content"]
+                # Replace multiple spaces with single space
+                response_text = ' '.join(response_text.split())
+                # Replace newlines with spaces
+                response_text = response_text.replace('\n', ' ')
+                return response_text
             else:
                 raise ValueError("No response content found in API response")
                 

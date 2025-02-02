@@ -126,7 +126,7 @@ def get_tts_audio(text):
 def root():
     """Play welcome message and redirect to voice handler."""
     response = VoiceResponse()
-    response.play('/static/nouveau_debut.mp3')
+    response.play('/static/start_audio.mp3')
     response.redirect("/voice")
     return Response(str(response), mimetype="application/xml")
 
@@ -195,6 +195,18 @@ def process_voice():
         # Check if the conversation should end
         if any(exit_word in speech_text.lower() for exit_word in ["goodbye", "bye", "exit", "quit"]):
             print("Exit word detected, ending call")
+            
+            # Dump conversation context to CSV before ending
+            try:
+                with open('911.csv', 'a', newline='') as csvfile:
+                    writer = csv.writer(csvfile)
+                    context = get_conversation_context(call_sid)
+                    conversation_text = ' '.join([msg['content'] for msg in context])
+                    writer.writerow([time.strftime("%Y-%m-%d %H:%M:%S"), call_sid, conversation_text])
+                print("Conversation context saved to CSV")
+            except Exception as e:
+                print(f"Error saving conversation to CSV: {e}")
+            
             response.play('/static/goodbye_audio.mp3')  # Optional: custom goodbye message
             response.hangup()
             if call_sid in conversation_history:
@@ -210,6 +222,19 @@ def process_voice():
             print(f"Prompt context:\n{prompt}")
             ai_reply = openrouter_api.generate_text(prompt)
             print(f"AI Response: {ai_reply}")
+            
+            # Check if the AI response contains the trigger phrase
+            if "we have your information" in ai_reply.lower():
+                # Dump conversation context to CSV
+                try:
+                    with open('911.csv', 'a', newline='') as csvfile:
+                        writer = csv.writer(csvfile)
+                        context = get_conversation_context(call_sid)
+                        conversation_text = ' '.join([msg['content'] for msg in context])
+                        writer.writerow([time.strftime("%Y-%m-%d %H:%M:%S"), call_sid, conversation_text])
+                    print("Conversation context saved to CSV")
+                except Exception as e:
+                    print(f"Error saving conversation to CSV: {e}")
         except Exception as e:
             error_text = "I'm sorry, I'm having trouble understanding you right now. Please try again later."
             response.say("We're experiencing technical difficulties. Please try again.")

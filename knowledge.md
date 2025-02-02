@@ -47,6 +47,13 @@ Emergency dispatch voice assistant that:
 - Always use ElevenLabs TTS, no fallback
 - Use ElevenLabs Python client with convert_as_stream for audio synthesis
 
+## Twilio Call Handling
+- Use background processing for long-running operations (AI/TTS)
+- Keep connection alive with hold/redirect pattern
+- Store async results in thread-safe shared dictionary
+- Clean up results after use
+- Use short pauses (2-3s) between hold messages
+
 ### Important Implementation Details
 - Only start_audio.mp3 required in /static directory
 - Conversation history kept in memory (per call)
