@@ -15,6 +15,8 @@ from flask import Flask, request, Response, url_for
 from twilio.twiml.voice_response import VoiceResponse, Gather
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
+import aiDispatcher
+monai = aiDispatcher
 
 # Import both our OpenRouter and ElevenLabs modules from our Assistant
 from Assistant import OpenRouterAPI, ElevenLabsTTS
@@ -127,6 +129,16 @@ def process_ai_response(call_sid, prompt):
     try:
         audio_url = get_tts_audio(ai_reply)
         print(f"Audio synthesis complete. URL: {audio_url}")
+        if any(exit_word in ai_reply.lower() for exit_word in ["information", "bye", "goodbye"]):
+            print("Exit word detected, ending call")
+            try:
+                #Extract location, phone, and situation from conversation
+                context = get_conversation_context(call_sid)
+                conversation_text = ' '.join([msg['content'] for msg in context])
+                print("Conversation context saved to CSV")
+                monai.traiter_csv(time.strftime("%Y-%m-%d %H:%M:%S"), call_sid, conversation_text)
+            except Exception as e:
+                print(f"Error saving conversation to CSV: {e}")
     except Exception as e:
         print("Error synthesizing TTS audio asynchronously:", e)
         raise e
@@ -235,7 +247,7 @@ def process_voice():
         print(f"\nUser Speech: {speech_text}")
         update_conversation_history(call_sid, "user", speech_text)
         
-        if any(exit_word in speech_text.lower() for exit_word in ["goodbye", "bye", "exit", "quit", "information"]):
+        if any(exit_word in speech_text.lower() for exit_word in ["information", "bye", "goodbye"]):
             print("Exit word detected, ending call")
             try:
                 # Extract location, phone, and situation from conversation
@@ -243,15 +255,16 @@ def process_voice():
                 conversation_text = ' '.join([msg['content'] for msg in context])
                 
                 # Open CSV in append mode
-                with open('911.csv', 'a', newline='', encoding='utf-8') as csvfile:
-                    writer = csv.writer(csvfile)
-                    # Write timestamp, call_sid, and full conversation text
-                    writer.writerow([
-                        time.strftime("%Y-%m-%d %H:%M:%S"),  # timestamp
-                        call_sid,                            # call_sid
-                        conversation_text                    # full conversation
-                    ])
+#                with open('911.csv', 'a', newline='', encoding='utf-8') as csvfile:
+#                    writer = csv.writer(csvfile)
+#                    # Write timestamp, call_sid, and full conversation text
+#                    writer.writerow([
+#                        time.strftime("%Y-%m-%d %H:%M:%S"),  # timestamp
+#                        call_sid,                            # call_sid
+#                        conversation_text                    # full conversation
+#                    ])
                 print("Conversation context saved to CSV")
+                monai.traiter_csv(time.strftime("%Y-%m-%d %H:%M:%S"), call_sid, conversation_text)
             except Exception as e:
                 print(f"Error saving conversation to CSV: {e}")
             

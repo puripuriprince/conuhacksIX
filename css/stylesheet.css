@@ -1,3 +1,5 @@
+
+ 
 body{
     overflow: hidden;
     width: 100dvw;
@@ -22,7 +24,7 @@ body{
 }
 .sides{
     display: grid;
-    grid-template-columns: 60dvw 37vw;
+    grid-template-columns: 75dvw 20vw;
     gap: 20px;
 }
 .bg-grey{
@@ -62,10 +64,9 @@ body{
     padding: 5px;
     border-radius: 10px;
     display: grid;
-    grid-template-columns: 50px 45px auto 50px 50px;
+    grid-template-columns: 50px 45px auto 50px 50px 50px;
     align-items: center;
     transition: all 1s;
-    cursor: grab;
 }
 .item:hover{
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
@@ -168,7 +169,7 @@ strong{
 }
 .user-item{
     display: grid;
-    grid-template-columns: 40px auto;
+    grid-template-columns: 40px auto 30px;
     gap: 10px;
     align-items: center;
     margin: 10px;
@@ -182,4 +183,7 @@ strong{
 }
 .user{
     margin-left: 5px;
+}
+.first{
+    background: linear-gradient(to right, rgba(255, 0, 0, 0.727) 0%, transparent 50%);
 }

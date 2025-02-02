@@ -8,14 +8,16 @@ Assistant.py – A minimal voice-enabled AI assistant
 import time
 import csv
 import os
-import re
 import sys
 import json
 import requests
 from dotenv import load_dotenv
 import Database
+from twilio.rest import Client
+
 # Load environment variables
 load_dotenv()
+client = Client(os.getenv("TWILIO_SID"), os.getenv("TWILIO_KEY"))
 
 # ------------------------------
 # OpenRouter API for Text Generation
@@ -115,40 +117,13 @@ class VoiceAssistant:
 # ------------------------------
 # Main Execution
 # ------------------------------
-def main():
-    database = Database
-    # S'occupe d'aller chercher les infos importantes
-    def extraire_premiere_ligne(reader):
-        next(reader)  # Ignorer l'en-tête
-        first_row = next(reader)  # Lire la première ligne de données
-        return first_row  # Retourner la ligne sous forme de liste
+database = Database
 
 
-    def validate_phone_number(phone_number):
-        pattern = r"^\d{10}$"
-        return phone_number if re.match(pattern, phone_number) else None  # Retourne le numéro ou None
 
-
-    # Ouvrir le fichier dans le même bloc
-    with open("911.csv", mode='r', encoding='utf-8') as file:
-        reader = csv.reader(file)  # Créer le lecteur CSV
-        liste_var = extraire_premiere_ligne(reader)  # Lire la première ligne après l'en-tête
-
-
-    location = liste_var[0]
-    phone = liste_var[1]
-    situation = liste_var[2]
-
-
-    if(validate_phone_number(phone)):
-        print()
-    else:
-        if(phone[0] == 1):
-            phone.pop(0)
-
-    def recuperer_info(situation):
+def recuperer_info(situation):
          # Le rang de la situation
-        prompt_category = """Class the situation in one of these category : Police Emergencies, Firefighter Emergencies, Medical Emergencies, Unknown  respond only with the name of the category and nothing else :
+    prompt_category = """Class the situation in one of these category : Police Emergencies, Firefighter Emergencies, Medical Emergencies, Unknown  respond only with the name of the category and nothing else :
         Police Emergencies 🚔
 1. Urgent (Immediate danger, requires immediate police intervention)
 "Someone is trying to break into my house right now!"
@@ -216,9 +191,9 @@ Medical Emergencies 🚑
 "I have pain somewhere, but it’s hard to describe."
 
 """    
-        category = classifier_info_urgence(situation, prompt_category)
+    category = classifier_info_urgence(situation, prompt_category)
         # Le rang de la situation
-        prompt_rang = """Class the situation from 1 to 4 on a level of urgency, 1 being the most urgent, respond only with the number and the number only.
+    prompt_rang = """Class the situation from 1 to 4 on a level of urgency, 1 being the most urgent, respond only with the number and the number only.
         Police Emergencies 🚔
 1. Urgent (Immediate danger, requires immediate police intervention)
 "Someone is trying to break into my house right now!"
@@ -286,76 +261,48 @@ Medical Emergencies 🚑
 "I have pain somewhere, but it’s hard to describe."
 
 """    
-        rang = classifier_info_urgence(situation, prompt_rang)
+    rang = classifier_info_urgence(situation, prompt_rang)
         # Titre de la situation
-        prompt_titre = """Given a description of an emergency situation, generate a short and clear title summarizing the main topic of the call. The title should be concise, informative, and immediately understandable at a glance."""
-        titre = classifier_info_urgence(situation, prompt_titre)
-        # Courte description de la situation
-        prompt_resume = """Given a description of an emergency situation, generate a short summary of the situation. The summary should be brief (2-3 sentences) and provide a quick overview of the main events or issues."""
-        descr = classifier_info_urgence(situation, prompt_resume)
-        return [rang, descr, titre, category]
+    prompt_titre = """Given a description of an emergency situation, generate a short and clear title summarizing the main topic of the call. The title should be concise, informative, and immediately understandable at a glance."""
+    titre = classifier_info_urgence(situation, prompt_titre)
+    # Courte description de la situation
+    prompt_resume = """Given a description of an emergency situation, generate a short summary of the situation. The summary should be brief (2-3 sentences) and provide a quick overview of the main events or issues."""
+    descr = classifier_info_urgence(situation, prompt_resume)
+    # Envoyer un message à l'utilisateur
+    prompt_message = '"Once the emergency has been handled, provide a short list of easy steps to follow to stay safe and reduce pain based on the given situation. The response should be brief, practical, and tailored to the specific emergency. Dont repeat what has been said already like contact emergency services. "'
+    message_texto = classifier_info_urgence(situation, prompt_message)
+    send_message(message_texto)
+    return [rang, descr, titre, category]
 
-    def classifier_info_urgence(situation, prompt):
-        try:
-            # Instantiate the modules
-            text_generator = OpenRouterAPI()  # Using OpenRouter for DeepSeek
-            prompt = prompt + "situation : " + situation
-            assistant = VoiceAssistant(text_generator)
-            assistant.handle_interaction(situation)    
-            time.sleep(2)      
-        except ValueError as e:
-            print(f"Error initializing assistant: {e}")
-            sys.exit(1)
+def classifier_info_urgence(situation, prompt):
+    try:
+        # Instantiate the modules
+        text_generator = OpenRouterAPI()  # Using OpenRouter for DeepSeek
+        prompt = prompt + "situation : " + situation
+        assistant = VoiceAssistant(text_generator)
+        assistant.handle_interaction(situation)    
+        time.sleep(2)      
+    except ValueError as e:
+        print(f"Error initializing assistant: {e}")
+        sys.exit(1)
 
-        response = assistant.handle_interaction(prompt)
-        return response
+    response = assistant.handle_interaction(prompt)
+    return response
+
+def send_message(message):
+    messagetosend = client.messages.create(
+        body= message,
+        from_= os.getenv("TWILIO_NUM"),
+        to="+15149156626",)    
 
 
     # Fonction pour traiter et supprimer la ligne après traitement
-    def traiter_csv():
-        liste_info = []
-        with open("911.csv", mode='r+', encoding='utf-8') as file:
-            reader = csv.reader(file)
-            rows = list(reader)  # Lire toutes les lignes du fichier
-
-            # Vérifier s'il y a des lignes à traiter
-            if len(rows) <= 1:  # Si le fichier est vide (ou juste l'entête)
-                print("Fichier vide ou plus de données à traiter.")
-                return
-            
-            # Parcours chaque ligne après l'entête
-        rows_to_keep = []  # Liste pour stocker les lignes non traitées
-
-        if len(rows) <= 1:  # Ensure there is at least one row after the header
-            print("No data to process.")
-            return
-        
-        new_rows = [rows[0]]  # Keep header row
-        print(rows)
-        # Process the first data row (ignoring the header)
-        for ligne in rows:  
-            location = ligne[0]  # Localisation
-            phone = ligne[1]  # Numéro de téléphone
-            situation = ligne[2]  # Description de la situation
-
-            # Traiter la situation
-            array = recuperer_info(situation)  # Analyze the emergency
-            database.insert_info(location, phone, array[0], array[1], array[2], array[3])
+def traiter_csv(location, phone, situation):
+        # Traiter la situation
+    array = recuperer_info(situation)  # Analyze the emergency
+    database.insert_info(location, phone, array[0], array[1], array[2], array[3])
         
 
-            
-
-
-        # Réécrire le fichier sans la ligne traitée
-        with open("911.csv", mode='w', encoding='utf-8', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerows(rows)  # Écrire toutes les lignes restantes
-        print(liste_info)
-
-    # Lancer le traitement des lignes du CSV
-    traiter_csv()
 
 
 
-if __name__ == "__main__":
-    main()

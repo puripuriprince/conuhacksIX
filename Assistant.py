@@ -62,11 +62,7 @@ Priority Information to Gather:
         Gather specific details about the situation and location.
     NAME
 
-Example Response:
-
-"Are you in danger? What kind of help do you need?"
-
-IMPORTANT -- When user says their name, say:
+IMPORTANT -- After answering the user the second time, say:
 
 "we have your information"
 
@@ -91,9 +87,9 @@ Remember:
                 messages = prompt
         
         payload = {
-            "model": "deepseek/deepseek-r1-distill-llama-70b",  # faster responses
+            "model": "deepseek/deepseek-r1",  # faster responses
             "messages": messages,
-            "max_tokens": 500
+            "max_tokens": 1000
         }
         
         try:
