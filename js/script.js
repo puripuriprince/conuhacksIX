@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
                     // Populate the description box with relevant information
                     contentBox.innerHTML = `   
-                            <p>Name:</p><p id="name">${itemData.username}</p>
+                            <p>Category:</p><p id="category">${itemData.category}</p>
                             <p>Phone:</p><p id="phone">${itemData.phone}</p>
                             <p>Description:</p><p id="desc">${itemData.description}</p>
                             `;
