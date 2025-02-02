@@ -15,19 +15,19 @@ import schedule
 import time
 import os
 
-def run_script():
-    print("Exécution du script d'analyse des urgences...")
-    os.system("python script.py")  # Exécuter script.py
+# def run_script():
+#     print("Exécution du script d'analyse des urgences...")
+#     os.system("python aiDispatcher.py")  # Exécuter script.py
 
-# Planifier l'exécution toutes les 20 secondes
-schedule.every(20).seconds.do(run_script)
+# # Planifier l'exécution toutes les 20 secondes
+# schedule.every(20).seconds.do(run_script())
 
-def appel_script():
-    subprocess.run(["python","-Xfrozen_modules=off", file1])  # Exécute le premier script
-    threading.Timer(10, appel_script).start()
+# def appel_script():
+#     subprocess.run(["python","-Xfrozen_modules=off", file1])  # Exécute le premier script
+#     threading.Timer(10, appel_script).start()
 
-#run_script()
-appel_script()
+# #run_script()
+# appel_script()
 # Load environment variables
 load_dotenv()
 
