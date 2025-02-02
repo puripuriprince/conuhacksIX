@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function(){
             // Cache the data for later use
             dataCache.push(element);
     
-            itemContainer.innerHTML = `  <!-- Use innerHTML += to append, not overwrite -->
+            itemContainer.innerHTML += `  <!-- Use innerHTML += to append, not overwrite -->
                 <div class="item">
                     <div class="urgent"></div>
                     <div class="flex container">

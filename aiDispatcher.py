@@ -12,7 +12,7 @@ import sys
 import json
 import requests
 from dotenv import load_dotenv
-
+import Database
 
 # Load environment variables
 load_dotenv()
@@ -116,6 +116,7 @@ class VoiceAssistant:
 # Main Execution
 # ------------------------------
 def main():
+    database = Database
     # S'occupe d'aller chercher les infos importantes
     def extraire_premiere_ligne(reader):
         next(reader)  # Ignorer l'en-tête
@@ -147,7 +148,7 @@ def main():
 
     def recuperer_info(situation):
         # Le rang de la situation
-        prompt_rang = """Class the situation from 1 to 4 on a level of urgency, 1 being the most urgent, respond only with the number and the section title that is corresponding.
+        prompt_rang = """Class the situation from 1 to 4 on a level of urgency, 1 being the most urgent, respond only with the number and the number only.
         Police Emergencies 🚔
 1. Urgent (Immediate danger, requires immediate police intervention)
 "Someone is trying to break into my house right now!"
@@ -222,7 +223,7 @@ Medical Emergencies 🚑
         # Courte description de la situation
         prompt_resume = """Given a description of an emergency situation, generate a short summary of the situation. The summary should be brief (2-3 sentences) and provide a quick overview of the main events or issues."""
         descr = classifier_info_urgence(situation, prompt_resume)
-        return liste
+        return [rang, descr, titr]
 
     def classifier_info_urgence(situation, prompt):
         try:
@@ -258,10 +259,11 @@ Medical Emergencies 🚑
                 situation = ligne[2]  # Description de la situation
 
                 # Traiter la situation
-                liste_info.append(recuperer_info(situation))  # Passer à la fonction qui analyse la situation
-
+                array = recuperer_info(situation)  # Passer à la fonction qui analyse la situation
+                database.insert_info(location, phone, array[0], array[1], array[2])
+                
                 # Supprimer la ligne traitée
-                #rows.pop(i)  # Supprimer la ligne traitée (la ligne de l'urgence)
+                rows.pop(i)  # Supprimer la ligne traitée (la ligne de l'urgence)
                 break  # On arrête après une seule ligne traitée
 
             # Réécrire le fichier sans la ligne traitée

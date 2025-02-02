@@ -4,6 +4,7 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from dotenv import load_dotenv
 import os
+import Database
 
 # Load environment variables
 load_dotenv()
@@ -18,31 +19,26 @@ collection = db["helprequest"]
 app = Flask(__name__)
 CORS(app)
 
-class Database:
-    def __init__(self):
-        self.db = db
-        self.collection = collection
+def insert_info(address, phone, priority, description, title):
+    new_request = {
+        #"username": username,
+        "address": address,
+        "phone": phone,
+        "priority": priority,
+        "description": description,
+        #"category": category,
+        "title": title
+    }
+    collection.insert_one(new_request)
 
-    def insert_info(self, category, address, phone, priority, description, title):
-        new_request = {
-            #"username": username,
-            "address": address,
-            "phone": phone,
-            "priority": priority,
-            "description": description,
-            "category": category,
-            "title": title
-        }
-        self.collection.insert_one(new_request)
-
-    def select_info(self):
-        documents = list(self.collection.find({}))
-        for doc in documents:
-            doc["_id"] = str(doc["_id"])  # Convert ObjectId to string
-        return documents
+def select_info()é:
+    documents = list(collection.find({}))
+    for doc in documents:
+        doc["_id"] = str(doc["_id"])  # Convert ObjectId to string
+    return documents
 
 # Create an instance of Database
-database = Database()
+database = Database
 
 #  Flask Route to Get All Requests
 @app.route("/requests", methods=["GET"])
