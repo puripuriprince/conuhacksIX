@@ -80,6 +80,13 @@ def build_prompt_from_history(call_sid):
     prompt = "\n".join(f"{msg['role'].capitalize()}: {msg['content']}" for msg in history)
     return prompt
 
+
+#- Exact address or location with landmarks
+#- Nature of emergency (medical, fire, police)
+#- Number of people involved
+#- Any immediate dangers
+
+
 # ----------------------------
 # ElevenLabs TTS Asynchronous call helper
 # ----------------------------
@@ -148,7 +155,7 @@ def voice():
     get_conversation_context(call_sid)
     
     # Set up a Gather with speech input
-    gather = Gather(input="speech", action="/process_voice", method="POST", timeout=5)
+    gather = Gather(input="speech", action="/process_voice", method="POST", timeout=10)
     response.append(gather)
     
     # If nothing is received, play greeting again
@@ -252,7 +259,7 @@ def process_voice():
         response.pause(length=1)
         
         # Continue listening without a prompt
-        gather = Gather(input="speech", action="/process_voice", method="POST", timeout=5)
+        gather = Gather(input="speech", action="/process_voice", method="POST", timeout=10)
         response.append(gather)
         
     except Exception as e:
