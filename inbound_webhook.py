@@ -155,7 +155,7 @@ def check_ai():
         audio_url = future.result()
     except Exception as e:
         print("Error in background AI processing:", e)
-        response.play('/static/error_audio.mp3')
+        response = VoiceResponse()
         response.hangup()
         return Response(str(response), mimetype="application/xml")
     # If the background work succeeded, play the TTS synthesized audio.
@@ -255,7 +255,7 @@ def process_voice():
             except Exception as e:
                 print(f"Error saving conversation to CSV: {e}")
             
-            response.play('/static/goodbye_audio.mp3')
+            # response.play('/static/goodbye_audio.mp3')
             response.hangup()
             if call_sid in conversation_history:
                 del conversation_history[call_sid]
@@ -274,7 +274,7 @@ def process_voice():
         
     except Exception as e:
         print("Unexpected error in process_voice:", e)
-        response.play('/static/error_audio.mp3')
+        response = VoiceResponse()
         response.hangup()
     
     return Response(str(response), mimetype="application/xml")
