@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 dataCache.push(element);
             }
 
-            itemContainer.innerHTML += `  <!-- Use innerHTML += to append, not overwrite -->
+            itemContainer.innerHTML += `
                 <div class="item grab" id="${element._id}">
                     <div class="u${element.priority}"></div>
                     <div class="flex container">
@@ -92,17 +92,4 @@ document.addEventListener("DOMContentLoaded", function () {
             .catch(error => console.error("Error:", error));
     }
 
-    let draggable = document.querySelector('grab');
-    let dropTarget = document.querySelector('dropTarget');
-
-    // Event listener for when dragging starts
-    draggable.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('text/plain', e.target.id);
-    });
-
-    // Event listener to allow dropping
-    dropTarget.addEventListener('dragover', (e) => {
-        e.preventDefault(); // Allow the drop
-        dropTarget.classList.add('over'); // Optional: highlight the drop target
-    });
 });
