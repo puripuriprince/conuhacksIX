@@ -71,7 +71,7 @@ Emergency dispatch voice assistant that:
 - TWILIO_NUM
 
 ## Development Notes
-- Flask server runs on port 5000
+- Flask server (inbound_webhook.py) runs on localhost:5000
 - Ngrok tunnel required for Twilio webhook
 - Static directory must exist and be accessible
 - Debug logs track entire conversation flow
