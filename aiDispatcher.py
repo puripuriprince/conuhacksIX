@@ -8,14 +8,16 @@ Assistant.py – A minimal voice-enabled AI assistant
 import time
 import csv
 import os
-import re
 import sys
 import json
 import requests
 from dotenv import load_dotenv
 import Database
+from twilio.rest import Client
+
 # Load environment variables
 load_dotenv()
+client = Client(os.getenv("TWILIO_SID"), os.getenv("TWILIO_KEY"))
 
 # ------------------------------
 # OpenRouter API for Text Generation
@@ -266,6 +268,10 @@ Medical Emergencies 🚑
     # Courte description de la situation
     prompt_resume = """Given a description of an emergency situation, generate a short summary of the situation. The summary should be brief (2-3 sentences) and provide a quick overview of the main events or issues."""
     descr = classifier_info_urgence(situation, prompt_resume)
+    # Envoyer un message à l'utilisateur
+    prompt_message = '"Once the emergency has been handled, provide a short list of easy steps to follow to stay safe and reduce pain based on the given situation. The response should be brief, practical, and tailored to the specific emergency. "'
+    message_texto = classifier_info_urgence(situation, prompt_message)
+    send_message(message_texto)
     return [rang, descr, titre, category]
 
 def classifier_info_urgence(situation, prompt):
@@ -282,6 +288,12 @@ def classifier_info_urgence(situation, prompt):
 
     response = assistant.handle_interaction(prompt)
     return response
+
+def send_message(message):
+    messagetosend = client.messages.create(
+        body= message,
+        from_= os.getenv("TWILIO_NUM"),
+        to="+14388207749",)    
 
 
     # Fonction pour traiter et supprimer la ligne après traitement

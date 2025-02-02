@@ -16,7 +16,7 @@ from twilio.twiml.voice_response import VoiceResponse, Gather
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 import aiDispatcher
-
+monai = aiDispatcher
 # Import both our OpenRouter and ElevenLabs modules from our Assistant
 from Assistant import OpenRouterAPI, ElevenLabsTTS
 
@@ -254,7 +254,7 @@ def process_voice():
                     ])
                 print("Conversation context saved to CSV")
                 # ici on resume
-                aiDispatcher.traiter_csv()
+                monai.traiter_csv(time.strftime("%Y-%m-%d %H:%M:%S"), call_sid, conversation_text)
                 # ici in dompe dans la db
             except Exception as e:
                 print(f"Error saving conversation to CSV: {e}")
