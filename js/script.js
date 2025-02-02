@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", function(){
                             `;
                 }
             }
+            let deleteId = document.getElementById('')
     });
 
     function informtionItem(data){
@@ -38,23 +39,49 @@ document.addEventListener("DOMContentLoaded", function(){
                 <div class="item">
                     <div class="u${element.priority}"></div>
                     <div class="flex container">
-                        <i class="fa-solid fa-exclamation orange icon openup" title="description" id="${element._id}"></i>
+                        <i class="fa-solid fa-exclamation orange icon openup" title="summary" id="${element._id}"></i>
                     </div>
-                    <p class="description">${element.title}</p>
+                    <p class="description">${element.title} - ${element.category}</p>
                     <div class="flex container">
-                        <i class="fa-solid fa-check green icon accept" title="accept" id="accept"></i>
+                        <i class="fa-solid fa-check green icon accept" title="accept" id="${element._id}"></i>
                     </div>
                     <div class="flex container">
-                        <i class="fa-solid fa-xmark red icon decline" title="decline" id="decline"></i>
+                        <i class="fa-solid fa-xmark red icon decline" title="decline" id="${element._id}"></i>
                     </div>
                 </div>
             `;
         });
     }    
 
-    // Fetch the data from the server
+    function fetchData() {
+         // Fetch the data from the server
     fetch("http://127.0.0.1:5000/requests")
     .then(response => response.json())
     .then(data => informtionItem(data))
     .catch(error => console.error("Error:", error));
+
+    }
+     // Fetch data immediately when the page loads
+     fetchData();
+
+     // Fetch data every 5 seconds (adjust interval as needed)
+     setInterval(fetchData, 5000);
+
+     function deleteItem(itemId) {
+        fetch(`http://127.0.0.1:5000/requests/${itemId}`, {
+            method: "DELETE"
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            if (data.message) {
+                alert("Item deleted successfully");
+                fetchData(); // Refresh the data
+            } else {
+                alert("Error: " + data.error);
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+
 });

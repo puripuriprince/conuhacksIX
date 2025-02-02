@@ -5,6 +5,7 @@ from pymongo.server_api import ServerApi
 from dotenv import load_dotenv
 import os
 import Database
+from bson import ObjectId 
 
 # Load environment variables
 load_dotenv()
@@ -58,6 +59,21 @@ database = Database
 def get_requests():
     documents = database.select_info()
     return jsonify(documents)
+
+
+# DELETE request to remove an item by _id
+@app.route("/requests/<string:item_id>", methods=["DELETE"])
+def delete_request(item_id):
+    try:
+        result = collection.delete_one({"_id": ObjectId(item_id)})
+        if result.deleted_count > 0:
+            return jsonify({"message": "Item deleted successfully"}), 200
+        else:
+            return jsonify({"error": "Item not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+
 
 try:
     client.admin.command('ping')
