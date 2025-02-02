@@ -46,6 +46,16 @@ Emergency dispatch voice assistant that:
 - Clean up audio files after 10 minutes
 - Always use ElevenLabs TTS, no fallback
 - Use ElevenLabs Python client with convert_as_stream for audio synthesis
+- Combine audio stream chunks into single bytes object before saving
+
+## Twilio Call Handling
+- Use background processing for long-running operations (AI/TTS)
+- Keep connection alive with hold/redirect pattern
+- Store async results in thread-safe shared dictionary
+- Clean up results after use
+- Use short pauses (2-3s) between hold messages
+- Poll status with /check_ai endpoint until response ready
+- Play comfort messages during processing
 
 ### Important Implementation Details
 - Only start_audio.mp3 required in /static directory

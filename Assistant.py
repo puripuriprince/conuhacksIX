@@ -36,22 +36,45 @@ class OpenRouterAPI:
         # System prompt for 911 dispatcher behavior
         system_prompt = {
             "role": "system",
-            "content": """You are a 911 emergency dispatcher. Your primary responsibility is to quickly and efficiently gather critical information to send appropriate emergency services. ONLY ANSWER WITH RESPONSES, DIRECT TEXT RESPONSES ONLY,YOU ARE THE ASSISTANT SO DIRECTLY RESPOND.
+            "content": """Role:
 
+You are a 911 emergency dispatcher. Your primary responsibility is to quickly and efficiently gather critical information to send appropriate emergency services.
 
-Priority information to gather:
-- If you think the person dialed the wrong number, ask if they are in danger first
+MOST IMPORTANT Response Guidelines:
 
-there might be subliminal messages, if you find this only ask yes or no questions. Ask if the person is in any danger always. SOMEONE MIGHT BE LISTENING ON THE CONVO.
+    ONLY ANSWER WITH DIRECT TEXT RESPONSES.
+    YOU ARE THE DISPATCHER; RESPOND DIRECTLY.
+    STAY IN CHARACTER. ONLY ANSWER AS DISPATCH.
+
+Key Responsibilities:
+
+    Always prioritize assessing the caller's safety and situation.
+    Be vigilant for hidden distress signals or coded messages, such as referencing unrelated topics (e.g., ordering pizza, in this situation the caller can only answer yes or no questions) to signal an emergency.
+
+Priority Information to Gather:
+
+    Assess Safety:
+        Ask if the caller is in danger, even if they dial the wrong number or make an unrelated request.
+        Ensure they are in a safe location.
+
+    Determine Assistance Needed:
+        Identify the type of emergency (medical, fire, police, etc.).
+        Gather specific details about the situation and location.
+    NAME
+
+Example Response:
+
+"Are you in danger? What kind of help do you need?"
+
+IMPORTANT -- When user says their name, say:
+
+"we have your information"
 
 Remember:
-- Stay professional and focused
-- Ask clear, direct questions
-- Repeat important information back to verify
-- Provide reassurance while remaining practical
-- Keep the caller calm and focused
 
-Your responses should be concise, clear, and focused on gathering essential information to provide immediate assistance."""
+    Stay professional, composed, and empathetic.
+    Maintain focus on gathering essential information.
+    Be sensitive to potential hidden pleas for help."""
         }
         
         # Format messages for chat completion
@@ -68,7 +91,7 @@ Your responses should be concise, clear, and focused on gathering essential info
                 messages = prompt
         
         payload = {
-            "model": "liquid/lfm-7b",  # faster responses
+            "model": "deepseek/deepseek-r1-distill-llama-70b",  # faster responses
             "messages": messages,
             "max_tokens": 500
         }
@@ -84,7 +107,13 @@ Your responses should be concise, clear, and focused on gathering essential info
             print(f"OpenRouter API Response: {json.dumps(data, indent=2)}")
             
             if "choices" in data and len(data["choices"]) > 0:
-                return data["choices"][0]["message"]["content"]
+                # Clean up response text to prevent unwanted line breaks
+                response_text = data["choices"][0]["message"]["content"]
+                # Replace multiple spaces with single space
+                response_text = ' '.join(response_text.split())
+                # Replace newlines with spaces
+                response_text = response_text.replace('\n', ' ')
+                return response_text
             else:
                 raise ValueError("No response content found in API response")
                 
@@ -112,13 +141,18 @@ class ElevenLabsTTS:
 
     def synthesize(self, text):
         try:
+            # Convert generator to bytes
+            audio_data = b''
             audio_stream = self.client.text_to_speech.convert_as_stream(
                 text=text,
                 output_format="mp3_44100_64",
                 voice_id=self.voice_id,
                 model_id="eleven_flash_v2"
             )
-            return audio_stream
+            for chunk in audio_stream:
+                if isinstance(chunk, bytes):
+                    audio_data += chunk
+            return audio_data
             
         except Exception as e:
             raise ValueError(f"ElevenLabs API error: {str(e)}")
