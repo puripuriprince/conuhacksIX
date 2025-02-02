@@ -37,7 +37,7 @@ body{
     overflow-y: auto;
 }
 .side-pannel{
-    height: 40dvh;
+    height: 45dvh;
 }
 .first-pannel {
     scrollbar-width: none;
