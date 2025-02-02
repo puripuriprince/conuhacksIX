@@ -24,7 +24,15 @@ schedule.every(20).seconds.do(run_script)
 
 def appel_script():
     subprocess.run(["python","-Xfrozen_modules=off", file1])  # Exécute le premier script
-    threading.Timer(10, appel_script()).start()
+
+count = 0
+
+while(True):
+    if count == 1000:
+        appel_script()
+        count = 0
+    else:
+        count += 1
 
 #run_script()
 appel_script()
