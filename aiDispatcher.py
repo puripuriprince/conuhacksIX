@@ -11,9 +11,9 @@ import re
 import sys
 import json
 import requests
-from dotenv import load_dotenv, jsonify
-from flask_cors import CORS
-import server
+from dotenv import load_dotenv
+
+
 # Load environment variables
 load_dotenv()
 
@@ -215,13 +215,13 @@ Medical Emergencies 🚑
 "I have pain somewhere, but it’s hard to describe."
 
 """    
-        liste = [classifier_info_urgence(situation, prompt_rang)]
+        rang = classifier_info_urgence(situation, prompt_rang)
         # Titre de la situation
         prompt_titre = """Given a description of an emergency situation, generate a short and clear title summarizing the main topic of the call. The title should be concise, informative, and immediately understandable at a glance."""
-        liste.append(classifier_info_urgence(situation, prompt_titre))
+        titre = classifier_info_urgence(situation, prompt_titre)
         # Courte description de la situation
         prompt_resume = """Given a description of an emergency situation, generate a short summary of the situation. The summary should be brief (2-3 sentences) and provide a quick overview of the main events or issues."""
-        liste.append(classifier_info_urgence(situation, prompt_resume))
+        descr = classifier_info_urgence(situation, prompt_resume)
         return liste
 
     def classifier_info_urgence(situation, prompt):
@@ -241,6 +241,7 @@ Medical Emergencies 🚑
 
     # Fonction pour traiter et supprimer la ligne après traitement
     def traiter_csv():
+        liste_info = []
         with open("911.csv", mode='r+', encoding='utf-8') as file:
             reader = csv.reader(file)
             rows = list(reader)  # Lire toutes les lignes du fichier
@@ -257,7 +258,7 @@ Medical Emergencies 🚑
                 situation = ligne[2]  # Description de la situation
 
                 # Traiter la situation
-                liste_info = recuperer_info(situation)  # Passer à la fonction qui analyse la situation
+                liste_info.append(recuperer_info(situation))  # Passer à la fonction qui analyse la situation
 
                 # Supprimer la ligne traitée
                 #rows.pop(i)  # Supprimer la ligne traitée (la ligne de l'urgence)
