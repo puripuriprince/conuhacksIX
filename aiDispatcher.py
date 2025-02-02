@@ -14,7 +14,6 @@ import json
 import requests
 from dotenv import load_dotenv
 import Database
-
 # Load environment variables
 load_dotenv()
 
@@ -303,7 +302,7 @@ Medical Emergencies 🚑
             prompt = prompt + "situation : " + situation
             assistant = VoiceAssistant(text_generator)
             assistant.handle_interaction(situation)    
-            time.sleep(5)      
+            time.sleep(2)      
         except ValueError as e:
             print(f"Error initializing assistant: {e}")
             sys.exit(1)
@@ -342,6 +341,7 @@ Medical Emergencies 🚑
             # Traiter la situation
             array = recuperer_info(situation)  # Analyze the emergency
             database.insert_info(location, phone, array[0], array[1], array[2], array[3])
+        
 
             
 

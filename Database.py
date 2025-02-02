@@ -6,7 +6,18 @@ from dotenv import load_dotenv
 import os
 import Database
 from bson import ObjectId 
+import subprocess
+import threading
 
+# Noms des fichiers Python à exécuter
+# file1 = "aiDispatcher.py"
+
+
+# def appel_script():
+#     subprocess.run(["python","-Xfrozen_modules=off", file1])  # Exécute le premier script
+#     threading.Timer(10, appel_script).start()
+
+# appel_script()
 # Load environment variables
 load_dotenv()
 

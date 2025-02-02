@@ -33,11 +33,11 @@ body{
     display: flex;
     align-items: center;
     flex-direction: column;
-    height: 90dvh;
+    height: 85dvh;
     overflow-y: auto;
 }
 .side-pannel{
-    height: 45dvh;
+    height: 40dvh;
 }
 .first-pannel {
     scrollbar-width: none;
@@ -58,6 +58,7 @@ body{
     grid-template-columns: 50px 45px auto 50px 50px;
     align-items: center;
     transition: all 1s;
+    cursor: grab;
 }
 .item:hover{
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
@@ -157,4 +158,13 @@ overflow-y: auto;
 }
 strong{
     align-self: center;
+}
+.user-item{
+    display: grid;
+    grid-template-columns: 40px auto;
+    gap: 10px;
+    align-items: center;
+    margin: 10px;
+    background-color: white;
+    border-radius: 10px;
 }
