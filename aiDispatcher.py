@@ -5,6 +5,7 @@ Assistant.py – A minimal voice-enabled AI assistant
  • Uses ElevenLabs for text-to-speech synthesis
  • Integrates phone calling (via Twilio)
 """
+import time
 import csv
 import os
 import re
@@ -301,7 +302,8 @@ Medical Emergencies 🚑
             text_generator = OpenRouterAPI()  # Using OpenRouter for DeepSeek
             prompt = prompt + "situation : " + situation
             assistant = VoiceAssistant(text_generator)
-            assistant.handle_interaction(situation)          
+            assistant.handle_interaction(situation)    
+            time.sleep(5)      
         except ValueError as e:
             print(f"Error initializing assistant: {e}")
             sys.exit(1)
@@ -325,33 +327,30 @@ Medical Emergencies 🚑
             # Parcours chaque ligne après l'entête
         rows_to_keep = []  # Liste pour stocker les lignes non traitées
 
-        for ligne in rows[1:]:  # Ignorer l'entête
+        if len(rows) <= 1:  # Ensure there is at least one row after the header
+            print("No data to process.")
+            return
+        
+        new_rows = [rows[0]]  # Keep header row
+        print(rows)
+        # Process the first data row (ignoring the header)
+        for ligne in rows:  
             location = ligne[0]  # Localisation
             phone = ligne[1]  # Numéro de téléphone
             situation = ligne[2]  # Description de la situation
 
-    # Traiter la situation
-    array = recuperer_info(situation)  # Passer à la fonction qui analyse la situation
-    database.insert_info(location, phone, array[0], array[1], array[2], array[3])
-            # # Parcours chaque ligne après l'entête
-            # for i, ligne in enumerate(rows[1:], start=1):  # Ignorer l'entête
-            #     location = ligne[0]  # Localisation
-            #     phone = ligne[1]  # Numéro de téléphone
-            #     situation = ligne[2]  # Description de la situation
+            # Traiter la situation
+            array = recuperer_info(situation)  # Analyze the emergency
+            database.insert_info(location, phone, array[0], array[1], array[2], array[3])
 
-            #     # Traiter la situation
-            #     array = recuperer_info(situation)  # Passer à la fonction qui analyse la situation
-            #     database.insert_info(location, phone, array[0], array[1], array[2], array[3])
-                
-            #     # Supprimer la ligne traitée
-            #     rows.pop(i)  # Supprimer la ligne traitée (la ligne de l'urgence)
-            #     break  # On arrête après une seule ligne traitée
+            
 
-            # Réécrire le fichier sans la ligne traitée
-            with open("911.csv", mode='w', encoding='utf-8', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerows(rows)  # Écrire toutes les lignes restantes
-            print(liste_info)
+
+        # Réécrire le fichier sans la ligne traitée
+        with open("911.csv", mode='w', encoding='utf-8', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerows(rows)  # Écrire toutes les lignes restantes
+        print(liste_info)
 
     # Lancer le traitement des lignes du CSV
     traiter_csv()

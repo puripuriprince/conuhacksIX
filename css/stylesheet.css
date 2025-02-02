@@ -1,11 +1,3 @@
-* {
-    overflow-x: hidden;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-*::-webkit-scrollbar{
-    display: none;
-}
 body{
     overflow: hidden;
     width: 100dvw;
@@ -47,9 +39,18 @@ body{
 .side-pannel{
     height: 45dvh;
 }
+.first-pannel {
+    scrollbar-width: none;
+    overflow-x: hidden;
+    -ms-overflow-style: none;
+}
+.first-pannel::-webkit-scrollbar{
+    display: none;
+} 
 .item{
     background-color: white;
-    margin-top: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
     width: 95%;
     padding: 5px;
     border-radius: 10px;
