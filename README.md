@@ -1,4 +1,6 @@
-[![Funeste Destin](https://img.youtube.com/vi/533HwqyZ6as/maxresdefault.jpg)](https://www.youtube.com/watch?v=533HwqyZ6as)
+## EmergenSee
+
+https://www.youtube.com/watch?v=533HwqyZ6as
 
 ## Inspiration
 86% of security of Quebec emergency call dispatchers say they are **overloaded** [1]. They work long hours in a stressful environment. In situations of **crisis**, calls can begin to stack up while it is crucial that every caller is answered in minimal time. In this context, we decided to build a  human-in-the-loop AI powered visualisation tool for emergency services dispatchers.
